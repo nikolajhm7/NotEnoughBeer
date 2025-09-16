@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Tile : MonoBehaviour
+public class Floor : MonoBehaviour
 {
     public Vector2Int GridPosition;
     public bool IsOccuppied = false;

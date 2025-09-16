@@ -10,13 +10,26 @@ public class GridManager : MonoBehaviour
     public Vector3 origin = Vector3.zero;
 
     [Header("References")]
-    public Tile tilePrefab;
-    public Transform container;
+    public Floor floorPrefab;
+    public Wall wallPrefab;
+
+    [Header("Parents")]
+    public Transform floorContainer;
+    public Transform wallsContainer;
 
     [Header("Runtime")]
     public bool generateOnPlay = true;
 
-    public Dictionary<Vector2Int, Tile> Tiles { get; private set; } = new();
+    [Header("Wall Settings")]
+    public float wallHeight = 1f;
+    public float wallThickness = 0.1f;
+
+    public Dictionary<Vector2Int, Floor> Tiles { get; private set; } = new();
+
+    public readonly List<Renderer> southWalls = new();
+    public readonly List<Renderer> northWalls = new();
+    public readonly List<Renderer> westWalls  = new();
+    public readonly List<Renderer> eastWalls  = new();
 
     void Start()
     {
@@ -27,7 +40,8 @@ public class GridManager : MonoBehaviour
     public void Generate()
     {
         Clear();
-        if (!tilePrefab) { Debug.LogWarning("Assign a Tile prefab."); return; }
+        if (!floorPrefab) { Debug.LogWarning("Assign a Tile prefab."); return; }
+        if (!wallPrefab) { Debug.LogError("Assign Wall prefab."); return; }
 
         for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x++)
@@ -35,17 +49,19 @@ public class GridManager : MonoBehaviour
             var grid = new Vector2Int(x, y);
             var world = GridToWorld(grid);
 
-            var t = Instantiate(tilePrefab, world, Quaternion.identity, container ? container : transform);
+            var t = Instantiate(floorPrefab, world, Quaternion.identity, floorContainer ? floorContainer : transform);
             t.name = $"Tile_{x}_{y}";
             t.Init(grid);
 
             Tiles[grid] = t;
         }
+
+        BuildPerimeterWalls();
     }
 
     public void Clear()
     {
-        foreach (Transform c in (container ? container : transform))
+        foreach (Transform c in (floorContainer ? floorContainer : transform))
             if (Application.isEditor) DestroyImmediate(c.gameObject);
             else Destroy(c.gameObject);
         Tiles.Clear();
@@ -73,6 +89,61 @@ public class GridManager : MonoBehaviour
         width = newWidth;
         height = newHeight;
         Generate();
+    }
+
+    void BuildPerimeterWalls()
+    {
+        {
+            float z = origin.z - tileSize * 0.5f;
+            for (int x = 0; x < width; x++)
+            {
+                float cx = origin.x + x * tileSize;
+                var pos = new Vector3(cx, wallHeight * 0.5f, z);
+                var r = SpawnWall(pos, Quaternion.identity);
+                southWalls.Add(r);
+            }
+        }
+
+        {
+            float z = origin.z + (height * tileSize - tileSize * 0.5f);
+            for (int x = 0; x < width; x++)
+            {
+                float cx = origin.x + x * tileSize;
+                var pos = new Vector3(cx, wallHeight * 0.5f, z);
+                var r = SpawnWall(pos, Quaternion.identity);
+                northWalls.Add(r);
+            }
+        }
+
+        {
+            float x = origin.x - tileSize * 0.5f;
+            for (int y = 0; y < height; y++)
+            {
+                float cz = origin.z + y * tileSize;
+                var pos = new Vector3(x, wallHeight * 0.5f, cz);
+                var r = SpawnWall(pos, Quaternion.Euler(0f, 90f, 0f));
+                westWalls.Add(r);
+            }
+        }
+
+        {
+            float x = origin.x + (width * tileSize - tileSize * 0.5f);
+            for (int y = 0; y < height; y++)
+            {
+                float cz = origin.z + y * tileSize;
+                var pos = new Vector3(x, wallHeight * 0.5f, cz);
+                var r = SpawnWall(pos, Quaternion.Euler(0f, 90f, 0f));
+                eastWalls.Add(r);
+            }
+        }
+    }
+
+    Renderer SpawnWall(Vector3 pos, Quaternion rot)
+    {
+        var w = Instantiate(wallPrefab, pos, rot, wallsContainer ? wallsContainer : transform);
+        w.transform.localScale = new Vector3(tileSize, wallHeight, wallThickness);
+        var r = w.GetComponentInChildren<Renderer>();
+        return r;
     }
 
 #if UNITY_EDITOR

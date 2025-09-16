@@ -35,6 +35,9 @@ public class PlayerMovement : MonoBehaviour
     float rotateNextRepeatTimeQ = -1f;
     float rotateNextRepeatTimeE = -1f;
 
+    public Vector2Int CurrentCell => cell;
+    public Vector2Int CurrentFacingDir => FacingDir();
+
     void Start()
     {
         if (!grid) { Debug.LogError("Assign GridManager."); enabled = false; return; }
