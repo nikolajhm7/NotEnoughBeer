@@ -24,8 +24,11 @@ public class GridManager : MonoBehaviour
     public float wallHeight = 1f;
     public float wallThickness = 0.1f;
 
+    // Tiles
     public Dictionary<Vector2Int, Floor> Tiles { get; private set; } = new();
+    readonly HashSet<Vector2Int> occupied = new();
 
+    // Walls
     public readonly List<Renderer> southWalls = new();
     public readonly List<Renderer> northWalls = new();
     public readonly List<Renderer> westWalls  = new();
@@ -90,6 +93,26 @@ public class GridManager : MonoBehaviour
         height = newHeight;
         Generate();
     }
+    
+    public bool IsOccupied(Vector2Int g) => occupied.Contains(g);
+
+    public void SetOccupied(IEnumerable<Vector2Int> cells, bool value)
+    {
+        foreach (var c in cells)
+        {
+            if (value) occupied.Add(c);
+            else occupied.Remove(c);
+        }
+    }
+
+    public bool TryGetTile(Vector2Int g, out Floor t) => Tiles.TryGetValue(g, out t);
+
+    public bool IsWalkable(Vector2Int c) => IsInside(c) && !IsOccupied(c);
+
+    public void ClearAllTints()
+    {
+        foreach (var kv in Tiles) kv.Value.SetTint(null);
+    }
 
     void BuildPerimeterWalls()
     {
@@ -145,6 +168,7 @@ public class GridManager : MonoBehaviour
         var r = w.GetComponentInChildren<Renderer>();
         return r;
     }
+
 
 #if UNITY_EDITOR
     void OnDrawGizmosSelected()

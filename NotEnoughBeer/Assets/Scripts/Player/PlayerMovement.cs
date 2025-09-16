@@ -51,15 +51,12 @@ public class PlayerMovement : MonoBehaviour
         var kb = Keyboard.current;
         if (kb == null) return;
 
-        // --- Rotation (Q/E), supports press + optional hold repeat ---
         if (!isMoving && !isRotating)
         {
-            // Immediate press
             if (kb.qKey.wasPressedThisFrame) { StartCoroutine(Rotate(-1)); SetupRotateRepeat(ref rotateNextRepeatTimeQ, rotateHoldInitialDelay); }
             if (kb.eKey.wasPressedThisFrame) { StartCoroutine(Rotate(+1)); SetupRotateRepeat(ref rotateNextRepeatTimeE, rotateHoldInitialDelay); }
         }
 
-        // Held rotation (optional)
         if (enableRotateHold && !isMoving && !isRotating)
         {
             if (kb.qKey.isPressed && Time.time >= rotateNextRepeatTimeQ && rotateNextRepeatTimeQ >= 0f)
@@ -76,11 +73,8 @@ public class PlayerMovement : MonoBehaviour
             if (!kb.eKey.isPressed) rotateNextRepeatTimeE = -1f;
         }
 
-        // --- Movement (WASD) with hold repeat ---
-        // Determine desired step direction from current key state (with priority order)
         Vector2Int desiredStep = GetStepDirFromKeys(kb);
 
-        // If no direction held, clear repeat
         if (desiredStep == Vector2Int.zero)
         {
             lastHeldStep = Vector2Int.zero;
@@ -88,7 +82,6 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        // On a *new* direction press this frame: move immediately (if free), then arm repeat
         bool pressedThisFrame = kb.wKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame ||
                                 kb.sKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame ||
                                 kb.upArrowKey.wasPressedThisFrame || kb.leftArrowKey.wasPressedThisFrame ||
@@ -102,28 +95,29 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        // If direction changed while holding, reset repeat delay
         if (desiredStep != lastHeldStep)
         {
             lastHeldStep = desiredStep;
             moveNextRepeatTime = Time.time + holdInitialDelay;
         }
 
-        // Repeats while holding
         if (!isMoving && !isRotating && moveNextRepeatTime >= 0f && Time.time >= moveNextRepeatTime)
         {
             if (TryStep(desiredStep))
-                moveNextRepeatTime = Time.time + holdRepeatInterval; // schedule next
+                moveNextRepeatTime = Time.time + holdRepeatInterval;
             else
-                moveNextRepeatTime = Time.time + holdRepeatInterval; // still schedule; you might be blocked/bounds
+                moveNextRepeatTime = Time.time + holdRepeatInterval;
         }
     }
 
     bool TryStep(Vector2Int step)
     {
         var target = cell + step;
-        if (!grid.IsInside(target)) return false;
+
+        if (!grid.IsWalkable(target)) return false;
+
         StartCoroutine(MoveTo(target));
+
         return true;
     }
 
