@@ -885,6 +885,8 @@ MonoBehaviour:
   wallsContainer: {fileID: 1477073450}
   generateOnPlay: 1
   wallLevels: 3
+  wallThicknessOffset: 0.1
+  wallHeightOffset: 0.4
 --- !u!1 &1648128658
 GameObject:
   m_ObjectHideFlags: 0

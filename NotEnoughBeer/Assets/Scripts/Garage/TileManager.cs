@@ -22,6 +22,8 @@ public class GridManager : MonoBehaviour
 
     [Header("Wall Settings")]
     public int wallLevels = 3;
+    public float wallThicknessOffset = 0.1f;
+    public float wallHeightOffset = 0.4f;
 
     // Tiles
     public Dictionary<Vector2Int, Floor> Tiles { get; private set; } = new();
@@ -117,15 +119,15 @@ public class GridManager : MonoBehaviour
     {
         southWalls.Clear(); northWalls.Clear(); westWalls.Clear(); eastWalls.Clear();
 
-        float zSouth = origin.z - tileSize * 0.5f;
-        float zNorth = origin.z + (height * tileSize - tileSize * 0.5f);
+        float zSouth = origin.z - tileSize * 0.5f - wallThicknessOffset;
+        float zNorth = origin.z + (height * tileSize - tileSize * 0.5f) + wallThicknessOffset;
 
-        float xWest  = origin.x - tileSize * 0.5f;
-        float xEast  = origin.x + (width  * tileSize - tileSize * 0.5f);
+        float xWest  = origin.x - tileSize * 0.5f - wallThicknessOffset;
+        float xEast  = origin.x + (width  * tileSize - tileSize * 0.5f) + wallThicknessOffset;
 
         for (int h = 0; h < wallLevels; h++)
         {
-            float y = h + 0.4f; // 0.4f for sinking into the floor a bit
+            float y = h + wallHeightOffset;
 
             // --- South (bottom edge), length along +X
             for (int x = 0; x < width; x++)

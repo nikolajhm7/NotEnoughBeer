@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BeerMaker9000
   m_EditorClassIdentifier: 
   id: machine
-  prefab: {fileID: 4784960659733562878, guid: 31ce96e9d7f042948a5220a50d399842, type: 3}
+  prefab: {fileID: 1943579373195669400, guid: fc98526123af78045ac6d7c106b9a288, type: 3}
   cost: 69
   occupiedOffsets:
   - {x: 0, y: 0}
