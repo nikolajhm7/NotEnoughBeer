@@ -27,6 +27,11 @@ public class MachinePlacer : MonoBehaviour
 
         if (kb.fKey.wasPressedThisFrame) Equip(defaultMachine);
 
+        if (kb.gKey.wasPressedThisFrame && Currency.Instance != null)
+        {
+            Currency.Instance?.AddCurrency(10);
+        }
+
         if (currentDef != null)
         {
             UpdatePreviewAndHighlights();
@@ -107,6 +112,16 @@ public class MachinePlacer : MonoBehaviour
         FindInvalidOccupied(occCells, invalidOcc);
 
         if (invalidOcc.Count > 0) return false;
+        
+        if (HasEnoughGoldForCurrent() == false) 
+        {
+            Debug.Log("Not enough money to place " + currentDef.id + $" (cost: {currentDef.cost}).");
+
+            Unequip();
+            return false;
+        }
+
+        Currency.Instance.SpendCurrency(currentDef.cost);
 
         // place
         var go = Instantiate(currentDef.prefab,
@@ -129,6 +144,10 @@ public class MachinePlacer : MonoBehaviour
     }
 
     // ----------------- helpers -----------------
+
+    bool HasEnoughGoldForCurrent()
+        => Currency.Instance != null && currentDef != null && Currency.Instance.CurrencyAmount >= currentDef.cost;
+
 
     void BuildRotatedCells(Vector2Int[] offsets, Vector2Int anchor, int facingIndex, List<Vector2Int> outList)
     {

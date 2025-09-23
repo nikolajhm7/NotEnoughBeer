@@ -6,6 +6,9 @@ public class MachineDefinition : ScriptableObject
     public string id = "machine";
     public GameObject prefab;
 
+    [Header("Economy")]
+    public int cost = 100;
+
     [Header("Footprint (grid offsets occupied by the machine)")]
     public Vector2Int[] occupiedOffsets = { Vector2Int.zero };
 

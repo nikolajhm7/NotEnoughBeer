@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: machine
   prefab: {fileID: 4784960659733562878, guid: 31ce96e9d7f042948a5220a50d399842, type: 3}
+  cost: 69
   occupiedOffsets:
   - {x: 0, y: 0}
   - {x: 1, y: 0}
@@ -22,6 +23,6 @@ MonoBehaviour:
   - {x: 0, y: 0}
   - {x: 1, y: 0}
   - {x: -1, y: 0}
-  occupiedOk: {r: 0.9019608, g: 0.34901962, b: 0.8408801, a: 1}
-  occupiedBad: {r: 0.9, g: 0.35, b: 0.35, a: 1}
-  affectedTint: {r: 0.22436255, g: 1, b: 0.16509432, a: 0.9}
+  occupiedOk: {r: 0.13298072, g: 0.7169812, b: 0.01690993, a: 0.39215687}
+  occupiedBad: {r: 0.5849056, g: 0.013794942, b: 0.013794942, a: 0.3882353}
+  affectedTint: {r: 0.22436255, g: 1, b: 0.16509432, a: 0.19215687}

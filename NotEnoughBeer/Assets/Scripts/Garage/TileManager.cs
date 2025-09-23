@@ -21,8 +21,7 @@ public class GridManager : MonoBehaviour
     public bool generateOnPlay = true;
 
     [Header("Wall Settings")]
-    public float wallHeight = 1f;
-    public float wallThickness = 0.1f;
+    public int wallLevels = 3;
 
     // Tiles
     public Dictionary<Vector2Int, Floor> Tiles { get; private set; } = new();
@@ -116,57 +115,56 @@ public class GridManager : MonoBehaviour
 
     void BuildPerimeterWalls()
     {
+        southWalls.Clear(); northWalls.Clear(); westWalls.Clear(); eastWalls.Clear();
+
+        float zSouth = origin.z - tileSize * 0.5f;
+        float zNorth = origin.z + (height * tileSize - tileSize * 0.5f);
+
+        float xWest  = origin.x - tileSize * 0.5f;
+        float xEast  = origin.x + (width  * tileSize - tileSize * 0.5f);
+
+        for (int h = 0; h < wallLevels; h++)
         {
-            float z = origin.z - tileSize * 0.5f;
+            float y = h + 0.4f; // 0.4f for sinking into the floor a bit
+
+            // --- South (bottom edge), length along +X
             for (int x = 0; x < width; x++)
             {
                 float cx = origin.x + x * tileSize;
-                var pos = new Vector3(cx, wallHeight * 0.5f, z);
-                var r = SpawnWall(pos, Quaternion.identity);
+                var r = SpawnWallTile(new Vector3(cx, y, zSouth), Quaternion.Euler(-90f, 0f, 0f));
                 southWalls.Add(r);
             }
-        }
 
-        {
-            float z = origin.z + (height * tileSize - tileSize * 0.5f);
+            // --- North (top edge), length along +X
             for (int x = 0; x < width; x++)
             {
                 float cx = origin.x + x * tileSize;
-                var pos = new Vector3(cx, wallHeight * 0.5f, z);
-                var r = SpawnWall(pos, Quaternion.identity);
+                var r = SpawnWallTile(new Vector3(cx, y, zNorth), Quaternion.Euler(-90f, 0f, 0f));
                 northWalls.Add(r);
             }
-        }
 
-        {
-            float x = origin.x - tileSize * 0.5f;
-            for (int y = 0; y < height; y++)
+            // --- West (left edge), rotate so length runs along +Z
+            for (int yIdx = 0; yIdx < height; yIdx++)
             {
-                float cz = origin.z + y * tileSize;
-                var pos = new Vector3(x, wallHeight * 0.5f, cz);
-                var r = SpawnWall(pos, Quaternion.Euler(0f, 90f, 0f));
+                float cz = origin.z + yIdx * tileSize;
+                var r = SpawnWallTile(new Vector3(xWest, y, cz), Quaternion.Euler(-90f, 90f, 0f));
                 westWalls.Add(r);
             }
-        }
 
-        {
-            float x = origin.x + (width * tileSize - tileSize * 0.5f);
-            for (int y = 0; y < height; y++)
+            // --- East (right edge), rotate so length runs along +Z
+            for (int yIdx = 0; yIdx < height; yIdx++)
             {
-                float cz = origin.z + y * tileSize;
-                var pos = new Vector3(x, wallHeight * 0.5f, cz);
-                var r = SpawnWall(pos, Quaternion.Euler(0f, 90f, 0f));
+                float cz = origin.z + yIdx * tileSize;
+                var r = SpawnWallTile(new Vector3(xEast, y, cz), Quaternion.Euler(-90f, 90f, 0f));
                 eastWalls.Add(r);
             }
         }
     }
 
-    Renderer SpawnWall(Vector3 pos, Quaternion rot)
+    Renderer SpawnWallTile(Vector3 pos, Quaternion rot)
     {
         var w = Instantiate(wallPrefab, pos, rot, wallsContainer ? wallsContainer : transform);
-        w.transform.localScale = new Vector3(tileSize, wallHeight, wallThickness);
-        var r = w.GetComponentInChildren<Renderer>();
-        return r;
+        return w.GetComponentInChildren<Renderer>();
     }
 
 
