@@ -3,13 +3,16 @@ using UnityEngine;
 
 public class CurrencyUI : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private TextMeshProUGUI currencyText;
     public static CurrencyUI Instance;
+    public Currency Currency;
+
 
     private void Awake()
     {
         Instance = this;
-        UpdateCurrency(0);
+        UpdateCurrency(Currency.CurrencyAmount);
     }
 
     public void UpdateCurrency(int amount)

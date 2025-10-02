@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
@@ -35,11 +36,16 @@ public class GridManager : MonoBehaviour
     public readonly List<Renderer> westWalls  = new();
     public readonly List<Renderer> eastWalls  = new();
 
+    // Interactables
+    private readonly Dictionary<Vector2Int, List<IInteractable>> interactablesByCell = new();
+    private readonly Dictionary<IInteractable, List<Vector2Int>> cellsByInteractable = new();
+
     void Start()
     {
         if (generateOnPlay) Generate();
     }
 
+    #region WorldGeneration
     [ContextMenu("Generate Grid")]
     public void Generate()
     {
@@ -65,54 +71,40 @@ public class GridManager : MonoBehaviour
 
     public void Clear()
     {
-        foreach (Transform c in (floorContainer ? floorContainer : transform))
-            if (Application.isEditor) DestroyImmediate(c.gameObject);
-            else Destroy(c.gameObject);
-        Tiles.Clear();
-    }
+        var floorParent = floorContainer ? floorContainer : transform;
 
-    public Vector3 GridToWorld(Vector2Int grid)
-        => origin + new Vector3(grid.x * tileSize, 0f, grid.y * tileSize);
-
-    public Vector2Int WorldToGrid(Vector3 world)
-    {
-        Vector3 local = world - origin;
-        return new Vector2Int(Mathf.RoundToInt(local.x / tileSize), Mathf.RoundToInt(local.z / tileSize));
-    }
-
-    public bool IsInside(Vector2Int grid) => grid.x >= 0 && grid.y >= 0 && grid.x < width && grid.y < height;
-
-    public void Expand(int addRight, int addLeft, int addUp, int addDown)
-    {
-        int newWidth = width + addRight + addLeft;
-        int newHeight = height + addUp + addDown;
-
-        // Shift origin if we add to the left/down
-        origin -= new Vector3(addLeft * tileSize, 0f, addDown * tileSize);
-
-        width = newWidth;
-        height = newHeight;
-        Generate();
-    }
-    
-    public bool IsOccupied(Vector2Int g) => occupied.Contains(g);
-
-    public void SetOccupied(IEnumerable<Vector2Int> cells, bool value)
-    {
-        foreach (var c in cells)
+        foreach (Transform c in floorParent)
         {
-            if (value) occupied.Add(c);
-            else occupied.Remove(c);
+            if (Application.isEditor)
+            {
+                DestroyImmediate(c.gameObject);
+            }
+            else
+            {
+                Destroy(c.gameObject);
+            }
         }
-    }
 
-    public bool TryGetTile(Vector2Int g, out Floor t) => Tiles.TryGetValue(g, out t);
+        var wallsParent = wallsContainer ? wallsContainer : transform;
 
-    public bool IsWalkable(Vector2Int c) => IsInside(c) && !IsOccupied(c);
+        foreach (Transform c in wallsParent)
+        {
+            if (Application.isEditor)
+            {
+                DestroyImmediate(c.gameObject);
+            }
+            else
+            {
+                Destroy(c.gameObject);
+            }
+        }
 
-    public void ClearAllTints()
-    {
-        foreach (var kv in Tiles) kv.Value.SetTint(null);
+        Tiles.Clear();
+        occupied.Clear();
+        southWalls.Clear(); northWalls.Clear(); westWalls.Clear(); eastWalls.Clear();
+
+        interactablesByCell.Clear();
+        cellsByInteractable.Clear();
     }
 
     void BuildPerimeterWalls()
@@ -122,8 +114,8 @@ public class GridManager : MonoBehaviour
         float zSouth = origin.z - tileSize * 0.5f - wallThicknessOffset;
         float zNorth = origin.z + (height * tileSize - tileSize * 0.5f) + wallThicknessOffset;
 
-        float xWest  = origin.x - tileSize * 0.5f - wallThicknessOffset;
-        float xEast  = origin.x + (width  * tileSize - tileSize * 0.5f) + wallThicknessOffset;
+        float xWest = origin.x - tileSize * 0.5f - wallThicknessOffset;
+        float xEast = origin.x + (width * tileSize - tileSize * 0.5f) + wallThicknessOffset;
 
         for (int h = 0; h < wallLevels; h++)
         {
@@ -169,6 +161,128 @@ public class GridManager : MonoBehaviour
         return w.GetComponentInChildren<Renderer>();
     }
 
+    #endregion WorldGeneration
+
+    #region Helpers
+    public Vector3 GridToWorld(Vector2Int grid)
+        => origin + new Vector3(grid.x * tileSize, 0f, grid.y * tileSize);
+
+    public Vector2Int WorldToGrid(Vector3 world)
+    {
+        Vector3 local = world - origin;
+        return new Vector2Int(Mathf.RoundToInt(local.x / tileSize), Mathf.RoundToInt(local.z / tileSize));
+    }
+
+    public bool IsInside(Vector2Int grid) => grid.x >= 0 && grid.y >= 0 && grid.x < width && grid.y < height;
+
+    public void Expand(int addRight, int addLeft, int addUp, int addDown)
+    {
+        int newWidth = width + addRight + addLeft;
+        int newHeight = height + addUp + addDown;
+
+        // Shift origin if we add to the left/down
+        origin -= new Vector3(addLeft * tileSize, 0f, addDown * tileSize);
+
+        width = newWidth;
+        height = newHeight;
+        Generate();
+    }
+    
+    public bool IsOccupied(Vector2Int g) => occupied.Contains(g);
+
+    public void SetOccupied(IEnumerable<Vector2Int> cells, bool value)
+    {
+        foreach (var c in cells)
+        {
+            if (value) occupied.Add(c);
+            else occupied.Remove(c);
+        }
+    }
+
+    public bool TryGetTile(Vector2Int g, out Floor t) => Tiles.TryGetValue(g, out t);
+
+    public bool IsWalkable(Vector2Int c) => IsInside(c) && !IsOccupied(c);
+
+    public void ClearAllTints()
+    {
+        foreach (var kv in Tiles) kv.Value.SetTint(null);
+    }
+
+    public float GetFloorTopY(Vector2Int cell)
+    {
+        if (TryGetTile(cell, out var f))
+        {
+            var r = f.GetComponentInChildren<Renderer>();
+            if (r) return r.bounds.max.y;   // top surface of that floor tile
+        }
+
+        return 0f;
+    }
+
+    public float GetObjectExtentsY(GameObject go)
+    {
+        var rs = go.GetComponentsInChildren<Renderer>();
+
+        if (rs.Length == 0) return 0f;
+
+        var b = rs[0].bounds;
+
+        for (int i = 1; i < rs.Length; i++) b.Encapsulate(rs[i].bounds);
+        return b.extents.y;                 // half-height of the machine/ghost
+    }
+
+    #endregion Helpers
+
+    #region Interactables
+
+    public void RegisterInteractableCells(IEnumerable<Vector2Int> cells, IInteractable interactable)
+    {
+        if (interactable == null || cells == null) return;
+
+        if (!cellsByInteractable.TryGetValue(interactable, out var list))
+        {
+            list = new List<Vector2Int>();
+            cellsByInteractable[interactable] = list;
+        }
+
+        foreach (var c in cells)
+        {
+            if (!interactablesByCell.TryGetValue(c, out var l))
+            {
+                l = new List<IInteractable>();
+                interactablesByCell[c] = l;
+            }
+
+            if (!l.Contains(interactable)) l.Add(interactable);
+
+            if (!list.Contains(c)) list.Add(c);
+        }
+    }
+
+    public void UnregisterInteractable(IInteractable interactable)
+    {
+        if (interactable == null) return;
+
+        if (!cellsByInteractable.TryGetValue(interactable, out var list)) return;
+
+        foreach (var c in list)
+        {
+            if (interactablesByCell.TryGetValue(c, out var l))
+            {
+                l.Remove(interactable);
+
+                if (l.Count == 0) interactablesByCell.Remove(c);
+            }
+        }
+        cellsByInteractable.Remove(interactable);
+    }
+
+    public IEnumerable<IInteractable> GetInteractablesAt(Vector2Int cell)
+    {
+        return interactablesByCell.TryGetValue(cell, out var l) ? l : Enumerable.Empty<IInteractable>();
+    }
+
+    #endregion Interactables
 
 #if UNITY_EDITOR
     void OnDrawGizmosSelected()

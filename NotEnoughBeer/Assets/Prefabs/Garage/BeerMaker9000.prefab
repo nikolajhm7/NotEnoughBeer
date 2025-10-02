@@ -55,5 +55,27 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: eb4c4e410ed3afd48a74c00583bd6680, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1025207668490206554}
   m_SourcePrefab: {fileID: 100100000, guid: eb4c4e410ed3afd48a74c00583bd6680, type: 3}
+--- !u!1 &1943579373195669400 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: eb4c4e410ed3afd48a74c00583bd6680, type: 3}
+  m_PrefabInstance: {fileID: 1601472725889028809}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1025207668490206554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1943579373195669400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8ec78dfe1612a94ab008ed3b4b5eb26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  InteractionDescription: Brew some mfin beer
+  priority: 2

@@ -5,9 +5,18 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
+    path: Assets/Scenes/Main Menu.unity
+    guid: cbc2afbff0e6ab94bba06c11e80384cc
+  - enabled: 0
     path: Assets/Scenes/Main.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    guid: 15f61ebb6b94f764dac592cd312a2be9
+  - enabled: 1
+    path: Assets/Scenes/Nikolaj Main Menu.unity
+    guid: 477eee5e3e5083c45b832a6cca7edf41
+  - enabled: 1
+    path: Assets/Scenes/Nikolaj Scene.unity
+    guid: 9c977c943ea8cf24888c5eb9dc89fa02
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

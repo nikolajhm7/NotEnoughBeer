@@ -1,4 +1,3 @@
-using System.Buffers.Text;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -26,11 +25,11 @@ public class MachinePlacer : MonoBehaviour
         var kb = Keyboard.current; var mouse = Mouse.current;
         if (kb == null || mouse == null || grid == null || mover == null) return;
 
-        if (kb.fKey.wasPressedThisFrame) Equip(defaultMachine);
+        if (kb.bKey.wasPressedThisFrame) Equip(defaultMachine);
 
         if (kb.gKey.wasPressedThisFrame && Currency.Instance != null)
         {
-            Currency.Instance?.AddCurrency(10);
+            Currency.Instance.AddCurrency(10);
         }
 
         if (currentDef != null)
@@ -41,6 +40,8 @@ public class MachinePlacer : MonoBehaviour
                 TryPlace();
         }
     }
+
+    #region Equip/Unequip
 
     void Equip(MachineDefinition def)
     {
@@ -72,7 +73,7 @@ public class MachinePlacer : MonoBehaviour
             ghost.transform.rotation = Quaternion.Euler(0f, fi * 90f, 0f);
 
             var baseXZ = grid.GridToWorld(anchor);
-            float y = GetFloorTopY(anchor) + GetObjectExtentsY(ghost);
+            float y = grid.GetFloorTopY(anchor) + grid.GetObjectExtentsY(ghost);
             ghost.transform.position = new Vector3(baseXZ.x, y, baseXZ.z);
         }
 
@@ -106,6 +107,9 @@ public class MachinePlacer : MonoBehaviour
         }
     }
 
+    #endregion Equip/Unequip
+
+    #region Placement
     bool TryPlace()
     {
         var anchor = mover.CurrentCell + mover.CurrentFacingDir;
@@ -137,7 +141,6 @@ public class MachinePlacer : MonoBehaviour
 
     void Place(Vector2Int anchor, Vector3 baseXZ, int facingIndex)
     {
-
         Currency.Instance.SpendCurrency(currentDef.cost);
 
         // place
@@ -145,25 +148,35 @@ public class MachinePlacer : MonoBehaviour
                              baseXZ,
                              Quaternion.Euler(0f, facingIndex * 90f, 0f));
 
-        float placeY = GetFloorTopY(anchor) + GetObjectExtentsY(go);
+        float placeY = grid.GetFloorTopY(anchor) + grid.GetObjectExtentsY(go);
         go.transform.position = new Vector3(baseXZ.x, placeY, baseXZ.z);
 
         var inst = go.AddComponent<MachineInstance>();
         inst.def = currentDef;
         inst.anchorCell = anchor;
         inst.facingIndex = facingIndex;
+        inst.YOffset = placeY - baseXZ.y;
+
         inst.occupiedCells.AddRange(occCells);
         BuildRotatedCells(currentDef.affectedOffsets, anchor, facingIndex, affCells);
         inst.affectedCells.AddRange(affCells);
 
         grid.SetOccupied(occCells, true);
+
+        var interactCells = inst.affectedCells.Count > 0 ? inst.affectedCells : new List<Vector2Int> { anchor };
+        var interactables = go.GetComponentsInChildren<IInteractable>();
+
+        foreach (var interactable in interactables)
+        {
+            grid.RegisterInteractableCells(interactCells, interactable);
+        }
     }
 
-    // ----------------- helpers -----------------
+    #endregion Placement
 
+    #region Helpers
     bool HasEnoughGoldForCurrent()
         => Currency.Instance != null && currentDef != null && Currency.Instance.CurrencyAmount >= currentDef.cost;
-
 
     void BuildRotatedCells(Vector2Int[] offsets, Vector2Int anchor, int facingIndex, List<Vector2Int> outList)
     {
@@ -201,31 +214,9 @@ public class MachinePlacer : MonoBehaviour
 
     void ClearHighlights() => grid.ClearAllTints();
 
-    float GetFloorTopY(Vector2Int cell)
-    {
-        if (grid.TryGetTile(cell, out var f))
-        {
-            var r = f.GetComponentInChildren<Renderer>();
-            if (r) return r.bounds.max.y;   // top surface of that floor tile
-        }
-
-        return 0f;
-    }
-
-    float GetObjectExtentsY(GameObject go)
-    {
-        var rs = go.GetComponentsInChildren<Renderer>();
-
-        if (rs.Length == 0) return 0f;
-
-        var b = rs[0].bounds;
-
-        for (int i = 1; i < rs.Length; i++) b.Encapsulate(rs[i].bounds);
-        return b.extents.y;                 // half-height of the machine/ghost
-    }
-
     int FacingToIndex(Vector2Int dir)
         => (dir == Vector2Int.up) ? 0 :
            (dir == Vector2Int.right) ? 1 :
            (dir == Vector2Int.down) ? 2 : 3;
+    #endregion Helpers
 }

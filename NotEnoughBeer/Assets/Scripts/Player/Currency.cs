@@ -10,6 +10,15 @@ public class Currency : MonoBehaviour
         Instance = this;
     }
 
+    public void SetCurrency(int amount)
+    {
+        CurrencyAmount = Mathf.Max(0, amount);
+        if (CurrencyUI.Instance)
+        {
+            CurrencyUI.Instance.UpdateCurrency(CurrencyAmount);
+        }
+    }
+
     public void AddCurrency(int amount)
     {
         CurrencyAmount += amount;

@@ -8,7 +8,7 @@ public class PlayerMovement : MonoBehaviour
     public GridManager grid;
 
     [Header("Grid")]
-    public Vector2Int startCell = new Vector2Int(0, 0);
+    public Vector2Int startCell = new(2, 0);
     public float heightOffset = 0.5f;
 
     [Header("Movement")]
@@ -37,12 +37,19 @@ public class PlayerMovement : MonoBehaviour
 
     public Vector2Int CurrentCell => cell;
     public Vector2Int CurrentFacingDir => FacingDir();
+    public int FacingIndex => facingIndex;
+    bool PositionInitializedFromSave = false;
 
     void Start()
     {
         if (!grid) { Debug.LogError("Assign GridManager."); enabled = false; return; }
-        cell = startCell;
-        SnapToCell();
+
+        if (!PositionInitializedFromSave)
+        {
+            cell = startCell;
+            SnapToCell();
+        }
+
         UpdateRotation();
     }
 
@@ -53,20 +60,20 @@ public class PlayerMovement : MonoBehaviour
 
         if (!isMoving && !isRotating)
         {
-            if (kb.qKey.wasPressedThisFrame) { StartCoroutine(Rotate(-1)); SetupRotateRepeat(ref rotateNextRepeatTimeQ, rotateHoldInitialDelay); }
-            if (kb.eKey.wasPressedThisFrame) { StartCoroutine(Rotate(+1)); SetupRotateRepeat(ref rotateNextRepeatTimeE, rotateHoldInitialDelay); }
+            if (kb.qKey.wasPressedThisFrame) { grid.StartCoroutine(Rotate(-1)); SetupRotateRepeat(ref rotateNextRepeatTimeQ, rotateHoldInitialDelay); }
+            if (kb.eKey.wasPressedThisFrame) { grid.StartCoroutine(Rotate(+1)); SetupRotateRepeat(ref rotateNextRepeatTimeE, rotateHoldInitialDelay); }
         }
 
         if (enableRotateHold && !isMoving && !isRotating)
         {
             if (kb.qKey.isPressed && Time.time >= rotateNextRepeatTimeQ && rotateNextRepeatTimeQ >= 0f)
             {
-                StartCoroutine(Rotate(-1));
+                grid.StartCoroutine(Rotate(-1));
                 rotateNextRepeatTimeQ = Time.time + rotateHoldRepeatInterval;
             }
             if (kb.eKey.isPressed && Time.time >= rotateNextRepeatTimeE && rotateNextRepeatTimeE >= 0f)
             {
-                StartCoroutine(Rotate(+1));
+                grid.StartCoroutine(Rotate(+1));
                 rotateNextRepeatTimeE = Time.time + rotateHoldRepeatInterval;
             }
             if (!kb.qKey.isPressed) rotateNextRepeatTimeQ = -1f;
@@ -116,7 +123,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (!grid.IsWalkable(target)) return false;
 
-        StartCoroutine(MoveTo(target));
+        grid.StartCoroutine(MoveTo(target));
 
         return true;
     }
@@ -202,12 +209,31 @@ public class PlayerMovement : MonoBehaviour
         return Vector2Int.zero;
     }
 
-    static Vector2Int PerpLeft(Vector2Int v)  => new Vector2Int(-v.y, v.x);
-    static Vector2Int PerpRight(Vector2Int v) => new Vector2Int(v.y, -v.x);
+    static Vector2Int PerpLeft(Vector2Int v) => new(-v.y, v.x);
+    static Vector2Int PerpRight(Vector2Int v) => new(v.y, -v.x);
 
     void SetupRotateRepeat(ref float nextTime, float initialDelay)
     {
         if (!enableRotateHold) { nextTime = -1f; return; }
         nextTime = Time.time + initialDelay;
+    }
+    /// <summary>
+    /// Instantly teleport the player to the specified cell (for loading game).
+    /// </summary>
+    public void TeleportToCell(Vector2Int c)
+    {
+        cell = c;
+        SnapToCell();
+        PositionInitializedFromSave = true;
+    }
+
+    /// <summary>
+    /// Instantly set the player's facing direction (for loading game).
+    /// </summary>
+    /// <param name="index"></param>
+    public void SetFacingIndex(int index)
+    {
+        facingIndex = ((index % 4) + 4) % 4; // ensure 0-3
+        UpdateRotation();
     }
 }
