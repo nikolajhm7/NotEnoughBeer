@@ -15,6 +15,7 @@ public class RingScript : MonoBehaviour
     [Header("Counters")]
     [SerializeField] private float redRingCount = 0f;
     [SerializeField] private float countIncrement = 1f; // Points per second
+    [SerializeField] private bool showDebugInfo = false; // Toggle debug messages
     
     [Header("Needle Reference")]
     [SerializeField] private NeedleScript needleScript;
@@ -67,11 +68,11 @@ public class RingScript : MonoBehaviour
         // Check if needle is within the red ring angle range
         bool inRedRing = IsAngleInRange(needleAngle, ringStartAngle, ringEndAngle);
         
-        // Check if needle is in green section (green takes priority)
+        // Check if needle is in green section (green takes priority and excludes red counting)
         bool inGreenSection = false;
         if (greenSectionScript != null)
         {
-            inGreenSection = greenSectionScript.CheckIfNeedleInGreen(needleAngle);
+            inGreenSection = greenSectionScript.IsNeedleInGreenSection(needleAngle);
         }
         
         // Only increment red ring counter if in red ring AND NOT in green section
@@ -81,7 +82,8 @@ public class RingScript : MonoBehaviour
             
             if (!wasInRedRing)
             {
-                Debug.Log("Needle entered red ring!");
+                if (showDebugInfo)
+                    Debug.Log($"Needle entered red ring at angle {needleAngle:F1}°! Red count: {redRingCount:F1}");
                 wasInRedRing = true;
             }
         }
@@ -89,7 +91,11 @@ public class RingScript : MonoBehaviour
         {
             if (wasInRedRing)
             {
-                Debug.Log("Needle left red ring!");
+                if (showDebugInfo)
+                {
+                    string reason = inGreenSection ? "(entered green section)" : "(left red ring area)";
+                    Debug.Log($"Needle left red ring {reason}! Final red count: {redRingCount:F1}");
+                }
                 wasInRedRing = false;
             }
         }
@@ -158,5 +164,29 @@ public class RingScript : MonoBehaviour
             float y = Mathf.Sin(angle) * ((outerRadius + innerRadius) / 2f);
             lineRenderer.SetPosition(i, new Vector3(x, y, 0));
         }
+    }
+
+    // Public methods to access counters and control from other scripts
+    public float GetRedRingCount()
+    {
+        return redRingCount;
+    }
+
+    public void ResetRedRingCount()
+    {
+        redRingCount = 0f;
+    }
+
+    public float GetTotalCount()
+    {
+        float greenCount = greenSectionScript != null ? greenSectionScript.GetGreenSectionCount() : 0f;
+        return redRingCount + greenCount;
+    }
+
+    public void ResetAllCounts()
+    {
+        redRingCount = 0f;
+        if (greenSectionScript != null)
+            greenSectionScript.ResetGreenSectionCount();
     }
 }

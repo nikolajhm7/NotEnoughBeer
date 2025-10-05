@@ -9,13 +9,14 @@ public class GreenSectionScript : MonoBehaviour
     [SerializeField] private Material greenMaterial;
     
     [Header("Green Section Settings")]
-    [SerializeField] private float startAngle = 120f; // Start angle of the green section
-    [SerializeField] private float endAngle = 140f;   // End angle of the green section
-    
+    [SerializeField] public float startAngle = 120f; // Start angle of the green section
+    [SerializeField] public float endAngle = 140f;   // End angle of the green section
+
     [Header("Detection & Counter")]
     [SerializeField] private float greenSectionCount = 0f;
     [SerializeField] private float countIncrement = 2f; // Higher points for green section
     [SerializeField] private NeedleScript needleScript;
+    [SerializeField] private bool showDebugInfo = false; // Toggle debug messages
 
     private float lastOuterRadius;
     private float lastInnerRadius;
@@ -62,7 +63,8 @@ public class GreenSectionScript : MonoBehaviour
             
             if (!wasInGreenSection)
             {
-                Debug.Log("Needle entered GREEN section! Bonus points!");
+                if (showDebugInfo)
+                    Debug.Log($"Needle entered GREEN section at angle {needleAngle:F1}°! Bonus points! Green count: {greenSectionCount:F1}");
                 wasInGreenSection = true;
             }
         }
@@ -70,7 +72,8 @@ public class GreenSectionScript : MonoBehaviour
         {
             if (wasInGreenSection)
             {
-                Debug.Log("Needle left GREEN section!");
+                if (showDebugInfo)
+                    Debug.Log($"Needle left GREEN section! Final green count: {greenSectionCount:F1}");
                 wasInGreenSection = false;
             }
         }
@@ -141,21 +144,29 @@ public class GreenSectionScript : MonoBehaviour
             greenMaterial.color = Color.green;
         }
         
-        lineRenderer.material = greenMaterial;
+        lineRenderer.material = greenMaterial; 
         lineRenderer.startWidth = outerRadius - innerRadius;
         lineRenderer.endWidth = outerRadius - innerRadius;
         lineRenderer.useWorldSpace = false;
         lineRenderer.loop = false; // This is an arc, not a full circle
         lineRenderer.positionCount = segments + 1;
 
+        // Convert needle coordinate system to visual coordinate system
+        // Based on observations: Up=175°, Left=265° in needle coordinates
+        // Standard coordinates: Up=90°, Left=180°
+        // Needle appears to have an 85° offset: needle = standard + 85°
+        // So: standard = needle - 85°
+        
         // Generate green arc points
         for (int i = 0; i <= segments; i++)
         {
             float t = (float)i / segments;
-            float angle = Mathf.Lerp(startAngle, endAngle, t) * Mathf.Deg2Rad;
+            float needleAngle = Mathf.Lerp(startAngle, endAngle, t);
+            // Convert needle angle to standard visual coordinate system
+            float visualAngle = (needleAngle - 85f) * Mathf.Deg2Rad;
             float radius = (outerRadius + innerRadius) / 2f;
-            float x = Mathf.Cos(angle) * radius;
-            float y = Mathf.Sin(angle) * radius;
+            float x = Mathf.Cos(visualAngle) * radius;
+            float y = Mathf.Sin(visualAngle) * radius;
             lineRenderer.SetPosition(i, new Vector3(x, y, 0.01f)); // Slightly forward to appear on top
         }
     }
