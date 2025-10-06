@@ -41,6 +41,13 @@ public class MachinePlacer : MonoBehaviour
         }
     }
 
+    // Allow UI to equip a machine for placement.
+    public void EquipFromUI(MachineDefinition def)
+    {
+        Equip(def);  // uses your existing private Equip(...)
+    }
+
+
     #region Equip/Unequip
 
     void Equip(MachineDefinition def)
