@@ -12,11 +12,38 @@ public class GreenSectionScript : MonoBehaviour
     [SerializeField] public float startAngle = 120f; // Start angle of the green section
     [SerializeField] public float endAngle = 140f;   // End angle of the green section
 
+    [Header("Randomizer Settings")]
+    [SerializeField] private bool enableRandomizer = false;
+    [SerializeField] private float randomizeInterval = 3f; // How often to randomize (seconds)
+    [SerializeField] private float minSectionSize = 10f; // Minimum size of green section in degrees
+    [SerializeField] private float maxSectionSize = 30f; // Maximum size of green section in degrees
+    [SerializeField] private float minAngle = 60f; // Minimum angle where green section can appear
+    [SerializeField] private float maxAngle = 300f; // Maximum angle where green section can appear
+    [SerializeField] private bool smoothTransition = true; // Smooth transition between positions
+    [SerializeField] private float transitionSpeed = 2f; // Speed of smooth transition
+
     [Header("Detection & Counter")]
     [SerializeField] private float greenSectionCount = 0f;
     [SerializeField] private float countIncrement = 2f; // Higher points for green section
     [SerializeField] private NeedleScript needleScript;
     [SerializeField] private bool showDebugInfo = false; // Toggle debug messages
+    
+    // Percentage tracking variables
+    private float totalGameTime = 0f;
+    private float timeInGreenSection = 0f;
+    
+    // Public property to expose the counter value for UI
+    public float GreenSectionCount => greenSectionCount;
+    
+    // Public property to expose the percentage
+    public float GreenPercentage => totalGameTime > 0 ? (timeInGreenSection / totalGameTime) * 100f : 0f;
+
+    // Randomizer variables
+    private float randomizeTimer = 0f;
+    private float targetStartAngle;
+    private float targetEndAngle;
+    private float currentStartAngle;
+    private float currentEndAngle;
 
     private float lastOuterRadius;
     private float lastInnerRadius;
@@ -31,6 +58,16 @@ public class GreenSectionScript : MonoBehaviour
         if (needleScript == null)
             needleScript = FindFirstObjectByType<NeedleScript>();
             
+        // Initialize randomizer values
+        if (enableRandomizer)
+        {
+            currentStartAngle = startAngle;
+            currentEndAngle = endAngle;
+            targetStartAngle = startAngle;
+            targetEndAngle = endAngle;
+            randomizeTimer = randomizeInterval; // Start with first randomization
+        }
+            
         CreateGreenArc();
         // Store initial values
         StoreLastValues();
@@ -38,6 +75,15 @@ public class GreenSectionScript : MonoBehaviour
 
     void Update()
     {
+        // Track total game time for percentage calculation
+        totalGameTime += Time.deltaTime;
+        
+        // Handle randomizer
+        if (enableRandomizer)
+        {
+            HandleRandomizer();
+        }
+        
         // Check if values have changed
         if (HasValuesChanged())
         {
@@ -55,16 +101,20 @@ public class GreenSectionScript : MonoBehaviour
     void CheckNeedleInGreenSection()
     {
         float needleAngle = needleScript.currentAngle;
-        bool inGreenSection = IsAngleInRange(needleAngle, startAngle, endAngle);
+        // Use current angles (which may be interpolated for smooth transitions)
+        float currentStart = enableRandomizer ? currentStartAngle : startAngle;
+        float currentEnd = enableRandomizer ? currentEndAngle : endAngle;
+        bool inGreenSection = IsAngleInRange(needleAngle, currentStart, currentEnd);
         
         if (inGreenSection)
         {
             greenSectionCount += countIncrement * Time.deltaTime;
+            timeInGreenSection += Time.deltaTime; // Track time in green section
             
             if (!wasInGreenSection)
             {
                 if (showDebugInfo)
-                    Debug.Log($"Needle entered GREEN section at angle {needleAngle:F1}°! Bonus points! Green count: {greenSectionCount:F1}");
+                    Debug.Log($"Needle entered GREEN section at angle {needleAngle:F1}°! Bonus points! Green count: {greenSectionCount:F1}, Percentage: {GreenPercentage:F1}%");
                 wasInGreenSection = true;
             }
         }
@@ -73,9 +123,67 @@ public class GreenSectionScript : MonoBehaviour
             if (wasInGreenSection)
             {
                 if (showDebugInfo)
-                    Debug.Log($"Needle left GREEN section! Final green count: {greenSectionCount:F1}");
+                    Debug.Log($"Needle left GREEN section! Final green count: {greenSectionCount:F1}, Percentage: {GreenPercentage:F1}%");
                 wasInGreenSection = false;
             }
+        }
+    }
+    
+    void HandleRandomizer()
+    {
+        randomizeTimer += Time.deltaTime;
+        
+        // Time to generate new random position and size
+        if (randomizeTimer >= randomizeInterval)
+        {
+            GenerateRandomGreenSection();
+            randomizeTimer = 0f;
+        }
+        
+        // Smooth transition to target position
+        if (smoothTransition)
+        {
+            currentStartAngle = Mathf.Lerp(currentStartAngle, targetStartAngle, transitionSpeed * Time.deltaTime);
+            currentEndAngle = Mathf.Lerp(currentEndAngle, targetEndAngle, transitionSpeed * Time.deltaTime);
+            
+            // Update the actual angles used for rendering
+            startAngle = currentStartAngle;
+            endAngle = currentEndAngle;
+        }
+        else
+        {
+            // Instant transition
+            startAngle = targetStartAngle;
+            endAngle = targetEndAngle;
+            currentStartAngle = targetStartAngle;
+            currentEndAngle = targetEndAngle;
+        }
+    }
+    
+    void GenerateRandomGreenSection()
+    {
+        // Generate random size
+        float sectionSize = Random.Range(minSectionSize, maxSectionSize);
+        
+        // Generate random start position (ensuring it fits within bounds)
+        float availableRange = maxAngle - minAngle - sectionSize;
+        if (availableRange > 0)
+        {
+            float randomStart = Random.Range(minAngle, minAngle + availableRange);
+            targetStartAngle = randomStart;
+            targetEndAngle = randomStart + sectionSize;
+            
+            if (showDebugInfo)
+                Debug.Log($"New green section: {targetStartAngle:F1}° to {targetEndAngle:F1}° (size: {sectionSize:F1}°)");
+        }
+        else
+        {
+            // Fallback if section is too big for the available range
+            targetStartAngle = minAngle;
+            targetEndAngle = maxAngle;
+            
+            if (showDebugInfo)
+                Debug.Log($"Green section too big for range, using full available: {targetStartAngle:F1}° to {targetEndAngle:F1}°");
         }
     }
     
@@ -174,7 +282,10 @@ public class GreenSectionScript : MonoBehaviour
     // Public method to check if needle is in green section (for RingScript)
     public bool IsNeedleInGreenSection(float needleAngle)
     {
-        return IsAngleInRange(needleAngle, startAngle, endAngle);
+        // Use current angles if randomizer is enabled, otherwise use set angles
+        float currentStart = enableRandomizer ? currentStartAngle : startAngle;
+        float currentEnd = enableRandomizer ? currentEndAngle : endAngle;
+        return IsAngleInRange(needleAngle, currentStart, currentEnd);
     }
 
     // Alternative method name in case of compilation issues
@@ -193,5 +304,13 @@ public class GreenSectionScript : MonoBehaviour
     public void ResetGreenSectionCount()
     {
         greenSectionCount = 0f;
+    }
+    
+    // Alias method for UI compatibility
+    public void ResetCounter()
+    {
+        greenSectionCount = 0f;
+        totalGameTime = 0f;
+        timeInGreenSection = 0f;
     }
 }

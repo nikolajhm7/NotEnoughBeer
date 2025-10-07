@@ -14,8 +14,11 @@ public class RingScript : MonoBehaviour
     
     [Header("Counters")]
     [SerializeField] private float redRingCount = 0f;
-    [SerializeField] private float countIncrement = 1f; // Points per second
+    [SerializeField] private float countIncrement = 2f; // Same as green section for fair comparison
     [SerializeField] private bool showDebugInfo = false; // Toggle debug messages
+    
+    // Public property to expose the counter value for UI
+    public float RedRingCount => redRingCount;
     
     [Header("Needle Reference")]
     [SerializeField] private NeedleScript needleScript;
@@ -188,5 +191,11 @@ public class RingScript : MonoBehaviour
         redRingCount = 0f;
         if (greenSectionScript != null)
             greenSectionScript.ResetGreenSectionCount();
+    }
+    
+    // Alias method for UI compatibility
+    public void ResetCounter()
+    {
+        redRingCount = 0f;
     }
 }

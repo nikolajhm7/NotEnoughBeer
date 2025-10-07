@@ -13,6 +13,10 @@ public class NeedleScript : MonoBehaviour
     [SerializeField] private float minAngle = 60f;
     [SerializeField] private float maxAngle = 300f;
     [SerializeField] private float zeroAngleOffset = 70f;
+    
+    [Header("Speed Settings")]
+    [SerializeField] private float normalSpeed = 1f; // Normal movement speed
+    [SerializeField] private float speedBoostMultiplier = 2f; // Speed multiplier when W is pressed
 
     void Awake()
     {
@@ -31,7 +35,23 @@ public class NeedleScript : MonoBehaviour
         rotationTimer += Time.deltaTime;
         if (rotationTimer >= rotationInterval)
         {
-            float angleDelta = (Keyboard.current != null && Keyboard.current.spaceKey.isPressed) ? -1f : 1f;
+            // Check input states
+            bool spacePressed = Keyboard.current != null && Keyboard.current.spaceKey.isPressed;
+            bool wPressed = Keyboard.current != null && Keyboard.current.wKey.isPressed;
+            
+            // Determine base direction
+            float angleDelta = spacePressed ? -1f : 1f;
+            
+            // Apply speed boost if W is pressed
+            if (wPressed)
+            {
+                angleDelta *= speedBoostMultiplier;
+            }
+            else
+            {
+                angleDelta *= normalSpeed;
+            }
+            
             RotateNeedle(angleDelta);
             rotationTimer = 0f;
         }
