@@ -23,6 +23,7 @@ public class RingScript : MonoBehaviour
     [Header("Needle Reference")]
     [SerializeField] private NeedleScript needleScript;
     [SerializeField] private GreenSectionScript greenSectionScript; // Reference to green section
+    [SerializeField] private FermentationGameManager gameManager;
 
     private float lastOuterRadius;
     private float lastInnerRadius;
@@ -38,6 +39,10 @@ public class RingScript : MonoBehaviour
         // Auto-find green section if not assigned
         if (greenSectionScript == null)
             greenSectionScript = FindFirstObjectByType<GreenSectionScript>();
+            
+        // Auto-find game manager if not assigned
+        if (gameManager == null)
+            gameManager = FindFirstObjectByType<FermentationGameManager>();
             
         CreateRing();
         // Store initial values
@@ -60,7 +65,12 @@ public class RingScript : MonoBehaviour
         // Check needle collision with ring
         if (needleScript != null)
         {
-            CheckNeedleCollision();
+            // Only check collision and count score if game is active
+            bool canCountScore = gameManager == null || gameManager.CanCountScore();
+            if (canCountScore)
+            {
+                CheckNeedleCollision();
+            }
         }
     }
 

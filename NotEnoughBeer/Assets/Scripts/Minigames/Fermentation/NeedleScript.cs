@@ -17,6 +17,9 @@ public class NeedleScript : MonoBehaviour
     [Header("Speed Settings")]
     [SerializeField] private float normalSpeed = 1f; // Normal movement speed
     [SerializeField] private float speedBoostMultiplier = 2f; // Speed multiplier when W is pressed
+    
+    [Header("Game Manager")]
+    [SerializeField] private FermentationGameManager gameManager;
 
     void Awake()
     {
@@ -28,10 +31,18 @@ public class NeedleScript : MonoBehaviour
         }
         currentAngle = Mathf.Clamp(startingAngle, minAngle, maxAngle);
         transform.localEulerAngles = new Vector3(0f, 0f, currentAngle + zeroAngleOffset);
+        
+        // Auto-find game manager if not assigned
+        if (gameManager == null)
+            gameManager = FindFirstObjectByType<FermentationGameManager>();
     }
 
     void Update()
     {
+        // Check if needle movement is allowed
+        bool canMove = gameManager == null || gameManager.CanMoveNeedle();
+        if (!canMove) return;
+        
         rotationTimer += Time.deltaTime;
         if (rotationTimer >= rotationInterval)
         {

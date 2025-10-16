@@ -15,8 +15,8 @@ public class GreenSectionScript : MonoBehaviour
     [Header("Randomizer Settings")]
     [SerializeField] private bool enableRandomizer = false;
     [SerializeField] private float randomizeInterval = 3f; // How often to randomize (seconds)
-    [SerializeField] private float minSectionSize = 10f; // Minimum size of green section in degrees
-    [SerializeField] private float maxSectionSize = 30f; // Maximum size of green section in degrees
+    [SerializeField] private float minSectionSize = 20f; // Minimum size of green section in degrees
+    [SerializeField] private float maxSectionSize = 80f; // Maximum size of green section in degrees
     [SerializeField] private float minAngle = 60f; // Minimum angle where green section can appear
     [SerializeField] private float maxAngle = 300f; // Maximum angle where green section can appear
     [SerializeField] private bool smoothTransition = true; // Smooth transition between positions
@@ -26,6 +26,7 @@ public class GreenSectionScript : MonoBehaviour
     [SerializeField] private float greenSectionCount = 0f;
     [SerializeField] private float countIncrement = 2f; // Higher points for green section
     [SerializeField] private NeedleScript needleScript;
+    [SerializeField] private FermentationGameManager gameManager;
     [SerializeField] private bool showDebugInfo = false; // Toggle debug messages
     
     // Percentage tracking variables
@@ -58,6 +59,10 @@ public class GreenSectionScript : MonoBehaviour
         if (needleScript == null)
             needleScript = FindFirstObjectByType<NeedleScript>();
             
+        // Auto-find game manager if not assigned
+        if (gameManager == null)
+            gameManager = FindFirstObjectByType<FermentationGameManager>();
+            
         // Initialize randomizer values
         if (enableRandomizer)
         {
@@ -75,11 +80,17 @@ public class GreenSectionScript : MonoBehaviour
 
     void Update()
     {
-        // Track total game time for percentage calculation
-        totalGameTime += Time.deltaTime;
+        // Only track time and update randomizer if game is active
+        bool shouldUpdate = gameManager == null || gameManager.CanCountScore();
         
-        // Handle randomizer
-        if (enableRandomizer)
+        if (shouldUpdate)
+        {
+            // Track total game time for percentage calculation
+            totalGameTime += Time.deltaTime;
+        }
+        
+        // Handle randomizer (only during active gameplay)
+        if (enableRandomizer && shouldUpdate)
         {
             HandleRandomizer();
         }
@@ -91,8 +102,8 @@ public class GreenSectionScript : MonoBehaviour
             StoreLastValues();
         }
         
-        // Check needle collision with green section
-        if (needleScript != null)
+        // Check needle collision with green section (only during active gameplay)
+        if (needleScript != null && shouldUpdate)
         {
             CheckNeedleInGreenSection();
         }
