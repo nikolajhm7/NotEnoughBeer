@@ -14,13 +14,14 @@ public class GreenSectionScript : MonoBehaviour
 
     [Header("Randomizer Settings")]
     [SerializeField] private bool enableRandomizer = false;
+    [SerializeField] private float initialDelay = 3f; // Delay before first randomization (seconds)
     [SerializeField] private float randomizeInterval = 3f; // How often to randomize (seconds)
-    [SerializeField] private float minSectionSize = 20f; // Minimum size of green section in degrees
+    [SerializeField] private float minSectionSize = 35f; // Minimum size of green section in degrees
     [SerializeField] private float maxSectionSize = 80f; // Maximum size of green section in degrees
     [SerializeField] private float minAngle = 60f; // Minimum angle where green section can appear
     [SerializeField] private float maxAngle = 300f; // Maximum angle where green section can appear
     [SerializeField] private bool smoothTransition = true; // Smooth transition between positions
-    [SerializeField] private float transitionSpeed = 2f; // Speed of smooth transition
+    [SerializeField] private float transitionSpeed = 0.5f; // Speed of smooth transition
 
     [Header("Detection & Counter")]
     [SerializeField] private float greenSectionCount = 0f;
@@ -45,6 +46,7 @@ public class GreenSectionScript : MonoBehaviour
     private float targetEndAngle;
     private float currentStartAngle;
     private float currentEndAngle;
+    private bool isFirstRandomization = true;
 
     private float lastOuterRadius;
     private float lastInnerRadius;
@@ -70,7 +72,7 @@ public class GreenSectionScript : MonoBehaviour
             currentEndAngle = endAngle;
             targetStartAngle = startAngle;
             targetEndAngle = endAngle;
-            randomizeTimer = randomizeInterval; // Start with first randomization
+            randomizeTimer = initialDelay; // Start with initial delay instead of immediate randomization
         }
             
         CreateGreenArc();
@@ -144,11 +146,15 @@ public class GreenSectionScript : MonoBehaviour
     {
         randomizeTimer += Time.deltaTime;
         
+        // Determine which interval to use (initial delay for first randomization, then regular interval)
+        float currentInterval = isFirstRandomization ? initialDelay : randomizeInterval;
+        
         // Time to generate new random position and size
-        if (randomizeTimer >= randomizeInterval)
+        if (randomizeTimer >= currentInterval)
         {
             GenerateRandomGreenSection();
             randomizeTimer = 0f;
+            isFirstRandomization = false; // After first randomization, use regular interval
         }
         
         // Smooth transition to target position
@@ -323,5 +329,9 @@ public class GreenSectionScript : MonoBehaviour
         greenSectionCount = 0f;
         totalGameTime = 0f;
         timeInGreenSection = 0f;
+        
+        // Reset randomizer state
+        isFirstRandomization = true;
+        randomizeTimer = 0f;
     }
 }

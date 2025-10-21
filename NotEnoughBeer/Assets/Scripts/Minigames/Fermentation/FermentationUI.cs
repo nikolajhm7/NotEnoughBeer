@@ -15,6 +15,8 @@ public class FermentationUI : MonoBehaviour
     [SerializeField] private Button startButton;
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TextMeshProUGUI finalScoreText;
+    [SerializeField] private GameObject blackOverlay; // Black screen overlay
+    [SerializeField] private GameObject blurOverlay; // Semi-transparent overlay for blur effect
     
     [Header("Script References")]
     [SerializeField] private GreenSectionScript greenSectionScript;
@@ -77,6 +79,13 @@ public class FermentationUI : MonoBehaviour
             
         if (countdownText != null)
             countdownText.gameObject.SetActive(false);
+            
+        // Show black overlay initially, hide blur overlay
+        if (blackOverlay != null)
+            blackOverlay.SetActive(true);
+            
+        if (blurOverlay != null)
+            blurOverlay.SetActive(false);
     }
 
     private void UpdateCounterDisplays()
@@ -128,11 +137,24 @@ public class FermentationUI : MonoBehaviour
     // Event handlers for game manager events
     private void OnCountdownStart()
     {
+        Debug.Log("OnCountdownStart called - hiding black overlay");
+        
         if (startButton != null)
             startButton.gameObject.SetActive(false);
             
         if (countdownText != null)
             countdownText.gameObject.SetActive(true);
+            
+        // Hide black overlay when countdown starts (reveals minigame)
+        if (blackOverlay != null)
+        {
+            Debug.Log("Black overlay found, setting it to inactive");
+            blackOverlay.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError("Black overlay is NULL! Make sure it's assigned in the FermentationUI inspector");
+        }
     }
 
     private void OnGameStart()
@@ -143,20 +165,27 @@ public class FermentationUI : MonoBehaviour
 
     private void OnGameEnd()
     {
+        Debug.Log("Game ended - showing blur overlay and final scores");
+        
+        // Show blur overlay to dim the background
+        if (blurOverlay != null)
+            blurOverlay.SetActive(true);
+        else
+            Debug.LogWarning("Blur overlay is null - assign it in the inspector for blur effect");
+            
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
             
         if (startButton != null)
             startButton.gameObject.SetActive(true);
             
-        // Update final score text
+        // Update final score text with only green accuracy percentage
         if (finalScoreText != null)
         {
-            float greenScore = greenSectionScript != null ? greenSectionScript.GreenSectionCount : 0f;
-            float redScore = ringScript != null ? ringScript.RedRingCount : 0f;
             float greenPercentage = greenSectionScript != null ? greenSectionScript.GreenPercentage : 0f;
             
-            finalScoreText.text = $"Final score %: {greenPercentage:F1}%";
+            finalScoreText.text = $"You scored a percentage of {greenPercentage:F1}%\n\n" +
+                                 GetPerformanceRating(greenPercentage);
         }
     }
 
@@ -173,6 +202,23 @@ public class FermentationUI : MonoBehaviour
                 countdownText.text = "GO!";
             }
         }
+    }
+
+    // Performance rating based on green percentage
+    private string GetPerformanceRating(float greenPercentage)
+    {
+        if (greenPercentage >= 90f)
+            return "PERFECT BREWING! ";
+        else if (greenPercentage >= 75f)
+            return "EXCELLENT BREWING! ";
+        else if (greenPercentage >= 60f)
+            return "GOOD BREWING! ";
+        else if (greenPercentage >= 40f)
+            return "FAIR BREWING ";
+        else if (greenPercentage >= 20f)
+            return "NEEDS IMPROVEMENT ";
+        else
+            return "KEEP PRACTICING! ";
     }
 
     /// <summary>
@@ -203,13 +249,29 @@ public class FermentationUI : MonoBehaviour
             
         UpdateCounterDisplays();
         UpdateTimerDisplay();
+        
+        // Show black overlay again when resetting
+        if (blackOverlay != null)
+            blackOverlay.SetActive(true);
+            
+        // Hide blur overlay when resetting
+        if (blurOverlay != null)
+            blurOverlay.SetActive(false);
     }
 
     // Button event handlers
     public void OnStartButtonClicked()
     {
+        Debug.Log("Start button clicked!");
         if (gameManager != null)
+        {
+            Debug.Log("Game manager found, calling OnStartButtonPressed");
             gameManager.OnStartButtonPressed();
+        }
+        else
+        {
+            Debug.LogError("Game manager is NULL! Make sure FermentationGameManager is in the scene");
+        }
     }
 
     private void OnDestroy()

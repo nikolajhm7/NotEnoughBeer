@@ -113,6 +113,7 @@ public class FermentationGameManager : MonoBehaviour
         countdownTime = countdownDuration;
         gameIsStarted = true;
         
+        Debug.Log("Invoking OnCountdownStart event");
         OnCountdownStart?.Invoke();
     }
 
