@@ -115,15 +115,22 @@ public class BottlingUI : MonoBehaviour
         if (failureFeedback != null)
             failureFeedback.SetActive(false);
             
-        // Hide overlays
+        // Hide overlays initially - they should only show during countdown
         if (blackOverlay != null)
             blackOverlay.SetActive(false);
         if (blurOverlay != null)
-            blurOverlay.SetActive(false);
+            blurOverlay.SetActive(true); // Keep blur overlay visible until game starts
             
         // Show start button
         if (startButton != null)
+        {
             startButton.gameObject.SetActive(true);
+            
+            // Set initial button text
+            TextMeshProUGUI buttonText = startButton.GetComponentInChildren<TextMeshProUGUI>();
+            if (buttonText != null)
+                buttonText.text = "Start Game";
+        }
             
         // Clear countdown text
         if (countdownText != null)
@@ -298,6 +305,9 @@ public class BottlingUI : MonoBehaviour
             
         if (blackOverlay != null)
             blackOverlay.SetActive(false);
+            
+        if (blurOverlay != null)
+            blurOverlay.SetActive(false);
     }
 
     private void OnGameEnd()

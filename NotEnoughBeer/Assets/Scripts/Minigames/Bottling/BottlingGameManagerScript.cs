@@ -29,7 +29,7 @@ public class BottlingGameManager : MonoBehaviour
     [SerializeField] private int failedBottles = 0;
     
     [Header("Button Prompt Settings")]
-    [SerializeField] private int numberOfButtons = 8;
+    [SerializeField] private int numberOfButtons = 2;
     [SerializeField] private float buttonPromptDuration = 2f;
     
     [Header("Script References")]
@@ -92,6 +92,35 @@ public class BottlingGameManager : MonoBehaviour
             if (spawnObject != null)
                 bottleSpawnPoint = spawnObject.transform;
         }
+        
+        // Ensure game starts in proper initial state
+        InitializeGameState();
+    }
+    
+    private void InitializeGameState()
+    {
+        gameIsActive = false;
+        gameIsStarted = false;
+        isCountingDown = false;
+        isWaitingForInput = false;
+        currentGameTime = 0f;
+        countdownTime = 0f;
+        spawnTimer = 0f;
+        promptTimer = 0f;
+        
+        // Clear any existing bottles
+        foreach (Bottle bottle in activeBottles)
+        {
+            if (bottle != null)
+                Destroy(bottle.gameObject);
+        }
+        activeBottles.Clear();
+        
+        // Reset scores
+        score = 0;
+        totalBottles = 0;
+        successfulBottles = 0;
+        failedBottles = 0;
     }
 
     private void Update()
@@ -164,13 +193,22 @@ public class BottlingGameManager : MonoBehaviour
 
     private void HandleInput()
     {
-        if (!isWaitingForInput) return;
+        if (!isWaitingForInput) 
+        {
+            // Debug: Show when we're not waiting for input
+            if (Input.anyKeyDown)
+                Debug.Log("Key pressed but not waiting for input. isWaitingForInput = " + isWaitingForInput);
+            return;
+        }
+        
+        Debug.Log("Waiting for input. Required button: " + currentRequiredButton);
         
         // Check for number key inputs (1-8)
         for (int i = 1; i <= numberOfButtons; i++)
         {
             if (Input.GetKeyDown(KeyCode.Alpha0 + i))
             {
+                Debug.Log("Player pressed: " + i);
                 HandleButtonInput(i);
                 return;
             }
@@ -244,6 +282,8 @@ public class BottlingGameManager : MonoBehaviour
         currentRequiredButton = Random.Range(1, numberOfButtons + 1);
         isWaitingForInput = true;
         promptTimer = 0f;
+        
+        Debug.Log("Button prompt triggered! Press " + currentRequiredButton + ". isWaitingForInput = " + isWaitingForInput);
         
         // Notify UI to show button prompt
         if (bottlingUI != null)

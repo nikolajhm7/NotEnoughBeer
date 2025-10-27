@@ -12,11 +12,11 @@ public class Bottle : MonoBehaviour
     [SerializeField] private bool isSuccessful = false; // Did player succeed
     
     [Header("Button Prompt Settings")]
-    [SerializeField] private float promptZoneDistance = 3f; // Distance from crate to show button prompt
+    [SerializeField] private float promptTriggerX = 0f; // X position where button prompt appears (middle of screen)
     [SerializeField] private bool hasTriggeredPrompt = false;
     
     [Header("Destruction Settings")]
-    [SerializeField] private float destroyAfterDistance = 10f; // Destroy bottle if it goes too far
+    [SerializeField] private float destroyAfterDistance = 1500f; // Destroy bottle if it goes too far
     
     [Header("References")]
     [SerializeField] private Transform beerCrate; // Will be set by spawn manager
@@ -77,12 +77,12 @@ public class Bottle : MonoBehaviour
 
     private void CheckPromptZone()
     {
-        if (hasTriggeredPrompt || beerCrate == null) return;
+        if (hasTriggeredPrompt) return;
         
-        float distanceToCrate = Vector3.Distance(transform.position, beerCrate.position);
-        
-        if (distanceToCrate <= promptZoneDistance)
+        // Trigger prompt when bottle reaches specific X position (middle of screen)
+        if (transform.position.x >= promptTriggerX)
         {
+            Debug.Log("Bottle triggered prompt at X: " + transform.position.x);
             hasTriggeredPrompt = true;
             OnBottleReachPromptZone?.Invoke(this);
         }
@@ -90,15 +90,17 @@ public class Bottle : MonoBehaviour
 
     private void CheckCrateReached()
     {
-        if (beerCrate == null) return;
+        // For visual-only crate, we'll check if bottle has traveled far enough
+        // or reached a specific end position instead of actual crate distance
         
-        float distanceToCrate = Vector3.Distance(transform.position, beerCrate.position);
-        
-        // If bottle is very close to crate
-        if (distanceToCrate <= 0.5f)
+        // Option 1: Check if bottle reached a far-right position (like X = 10)
+        if (transform.position.x >= 10f)
         {
             ReachCrate();
         }
+        
+        // Option 2: Alternatively, disable this check entirely if you don't need it
+        // since bottles will be destroyed by distance anyway
     }
 
     private void CheckDestroyDistance()
@@ -210,12 +212,9 @@ public class Bottle : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        // Draw prompt zone in scene view for debugging
-        if (beerCrate != null)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(beerCrate.position, promptZoneDistance);
-        }
+        // Draw prompt trigger line in scene view for debugging
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(new Vector3(promptTriggerX, -10, 0), new Vector3(promptTriggerX, 10, 0));
         
         // Draw destroy distance
         Gizmos.color = Color.red;
