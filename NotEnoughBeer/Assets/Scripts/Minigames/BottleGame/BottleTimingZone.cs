@@ -5,12 +5,17 @@ using TMPro;
 public class BottleTimingZone : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI buttonDisplayText;
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI missedText;
     
     private bool isInZone = false;
     private GameObject currentBottle = null;
     private bool bottleCaught = false;
     private Key requiredKey;
     private Key[] possibleKeys = { Key.Q, Key.W, Key.E, Key.R };
+    
+    private int score = 0;
+    private int missedBottles = 0;
 
     void Update()
     {
@@ -71,6 +76,9 @@ public class BottleTimingZone : MonoBehaviour
     {
         Debug.Log("Perfect! You caught the bottle!");
         // Add your success logic here (points, effects, etc.)
+        score++;
+        UpdateScoreUI();
+        
         bottleCaught = true;
         Destroy(currentBottle);
         currentBottle = null;
@@ -87,5 +95,23 @@ public class BottleTimingZone : MonoBehaviour
     {
         Debug.Log("Bottle passed without pressing space!");
         // Add logic for missing the bottle completely
+        missedBottles++;
+        UpdateMissedUI();
+    }
+    
+    void UpdateScoreUI()
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = "Score: " + score;
+        }
+    }
+    
+    void UpdateMissedUI()
+    {
+        if (missedText != null)
+        {
+            missedText.text = "Missed: " + missedBottles;
+        }
     }
 }
