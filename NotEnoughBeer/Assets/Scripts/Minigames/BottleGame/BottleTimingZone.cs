@@ -7,28 +7,44 @@ public class BottleTimingZone : MonoBehaviour
     [SerializeField] private TextMeshProUGUI buttonDisplayText;
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI missedText;
+    [SerializeField] private BottleGameManager gameManager;
     
     private bool isInZone = false;
     private GameObject currentBottle = null;
     private bool bottleCaught = false;
     private Key requiredKey;
-    private Key[] possibleKeys = { Key.Q, Key.W, Key.E, Key.R };
+    private Key[] possibleKeys = { Key.W, Key.A, Key.S, Key.D };
     
     private int score = 0;
     private int missedBottles = 0;
 
     void Update()
     {
-        // Check for the required key input using new Input System
-        if (Keyboard.current != null && Keyboard.current[requiredKey].wasPressedThisFrame)
+        if (Keyboard.current != null)
         {
-            if (isInZone && currentBottle != null)
+            // Check for the required key input using new Input System
+            if (Keyboard.current[requiredKey].wasPressedThisFrame)
             {
-                OnSuccessfulTiming();
+                if (isInZone && currentBottle != null)
+                {
+                    OnSuccessfulTiming();
+                }
+                else
+                {
+                    OnFailedTiming();
+                }
             }
-            else
+            // Check if any wrong key was pressed
+            else if (isInZone && currentBottle != null)
             {
-                OnFailedTiming();
+                foreach (Key key in possibleKeys)
+                {
+                    if (key != requiredKey && Keyboard.current[key].wasPressedThisFrame)
+                    {
+                        OnWrongKeyPressed();
+                        break;
+                    }
+                }
             }
         }
     }
@@ -83,6 +99,12 @@ public class BottleTimingZone : MonoBehaviour
         Destroy(currentBottle);
         currentBottle = null;
         isInZone = false;
+        
+        // Notify game manager
+        if (gameManager != null)
+        {
+            gameManager.OnBottleProcessed();
+        }
     }
 
     void OnFailedTiming()
@@ -91,12 +113,42 @@ public class BottleTimingZone : MonoBehaviour
         // Add your failure logic here
     }
 
+    void OnWrongKeyPressed()
+    {
+        Debug.Log("Wrong key! You pressed the wrong button!");
+        missedBottles++;
+        UpdateMissedUI();
+        
+        bottleCaught = true; // Prevent counting as missed again when exiting zone
+        Destroy(currentBottle);
+        currentBottle = null;
+        isInZone = false;
+        
+        // Clear UI text
+        if (buttonDisplayText != null)
+        {
+            buttonDisplayText.text = "";
+        }
+        
+        // Notify game manager
+        if (gameManager != null)
+        {
+            gameManager.OnBottleProcessed();
+        }
+    }
+
     void OnMissedBottle()
     {
         Debug.Log("Bottle passed without pressing space!");
         // Add logic for missing the bottle completely
         missedBottles++;
         UpdateMissedUI();
+        
+        // Notify game manager
+        if (gameManager != null)
+        {
+            gameManager.OnBottleProcessed();
+        }
     }
     
     void UpdateScoreUI()
@@ -113,5 +165,15 @@ public class BottleTimingZone : MonoBehaviour
         {
             missedText.text = "Missed: " + missedBottles;
         }
+    }
+    
+    public int GetScore()
+    {
+        return score;
+    }
+    
+    public int GetMissed()
+    {
+        return missedBottles;
     }
 }
