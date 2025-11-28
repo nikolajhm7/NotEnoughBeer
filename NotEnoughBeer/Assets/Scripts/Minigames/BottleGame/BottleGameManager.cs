@@ -31,6 +31,13 @@ public class BottleGameManager : MonoBehaviour
     [SerializeField] private BottleMoveScript bottleSpawner;
     [SerializeField] private BottleTimingZone timingZone;
     
+    [Header("Bottle Cap Putter")]
+    [SerializeField] private Transform bottomPart;
+    [SerializeField] private Transform secondBottomPart;
+    [SerializeField] private Transform middlePart;
+    [SerializeField] private float stepDistance = 0.02f;
+    [SerializeField] private float moveDuration = 0.1f;
+    
     [Header("Settings")]
     [SerializeField] private int countdownTime = 3;
     [SerializeField] private int totalBottles = 20;
@@ -228,5 +235,103 @@ public class BottleGameManager : MonoBehaviour
             int missed = timingZone.GetMissed();
             finalScoreText.text = "Final Score: " + finalScore + "\nMissed: " + missed;
         }
+    }
+    
+    public void PlayBottleCapAnimation()
+    {
+        Debug.Log("PlayBottleCapAnimation called!");
+        StartCoroutine(AnimateBottleCap());
+    }
+    
+    private System.Collections.IEnumerator AnimateBottleCap()
+    {
+        // Store original positions
+        Vector3 bottomOriginal = bottomPart != null ? bottomPart.localPosition : Vector3.zero;
+        Vector3 secondBottomOriginal = secondBottomPart != null ? secondBottomPart.localPosition : Vector3.zero;
+        Vector3 middleOriginal = middlePart != null ? middlePart.localPosition : Vector3.zero;
+        
+        float elapsed;
+        
+        // Step 1: Move all three parts down 0.1f
+        Vector3 bottomStep1 = bottomOriginal + Vector3.down * stepDistance;
+        Vector3 secondBottomStep1 = secondBottomOriginal + Vector3.down * stepDistance;
+        Vector3 middleStep1 = middleOriginal + Vector3.down * stepDistance;
+        
+        elapsed = 0f;
+        while (elapsed < moveDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / moveDuration;
+            
+            if (bottomPart != null)
+                bottomPart.localPosition = Vector3.Lerp(bottomOriginal, bottomStep1, t);
+            if (secondBottomPart != null)
+                secondBottomPart.localPosition = Vector3.Lerp(secondBottomOriginal, secondBottomStep1, t);
+            if (middlePart != null)
+                middlePart.localPosition = Vector3.Lerp(middleOriginal, middleStep1, t);
+            
+            yield return null;
+        }
+        
+        // Step 2: Move SecondBottom and Bottom down another 0.1f
+        Vector3 bottomStep2 = bottomStep1 + Vector3.down * stepDistance;
+        Vector3 secondBottomStep2 = secondBottomStep1 + Vector3.down * stepDistance;
+        
+        elapsed = 0f;
+        while (elapsed < moveDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / moveDuration;
+            
+            if (bottomPart != null)
+                bottomPart.localPosition = Vector3.Lerp(bottomStep1, bottomStep2, t);
+            if (secondBottomPart != null)
+                secondBottomPart.localPosition = Vector3.Lerp(secondBottomStep1, secondBottomStep2, t);
+            
+            yield return null;
+        }
+        
+        // Step 3: Move only Bottom down another 0.1f
+        Vector3 bottomStep3 = bottomStep2 + Vector3.down * stepDistance;
+        
+        elapsed = 0f;
+        while (elapsed < moveDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / moveDuration;
+            
+            if (bottomPart != null)
+                bottomPart.localPosition = Vector3.Lerp(bottomStep2, bottomStep3, t);
+            
+            yield return null;
+        }
+        
+        // Hold briefly at the bottom
+        yield return new WaitForSeconds(0.1f);
+        
+        // Return all parts to original positions
+        elapsed = 0f;
+        while (elapsed < moveDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / moveDuration;
+            
+            if (bottomPart != null)
+                bottomPart.localPosition = Vector3.Lerp(bottomStep3, bottomOriginal, t);
+            if (secondBottomPart != null)
+                secondBottomPart.localPosition = Vector3.Lerp(secondBottomStep2, secondBottomOriginal, t);
+            if (middlePart != null)
+                middlePart.localPosition = Vector3.Lerp(middleStep1, middleOriginal, t);
+            
+            yield return null;
+        }
+        
+        // Ensure final positions are exact
+        if (bottomPart != null)
+            bottomPart.localPosition = bottomOriginal;
+        if (secondBottomPart != null)
+            secondBottomPart.localPosition = secondBottomOriginal;
+        if (middlePart != null)
+            middlePart.localPosition = middleOriginal;
     }
 }

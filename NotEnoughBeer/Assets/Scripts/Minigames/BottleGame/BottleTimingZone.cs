@@ -104,6 +104,7 @@ public class BottleTimingZone : MonoBehaviour
         if (gameManager != null)
         {
             gameManager.OnBottleProcessed();
+            gameManager.PlayBottleCapAnimation();
         }
     }
 
