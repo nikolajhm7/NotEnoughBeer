@@ -5,7 +5,7 @@ public class BottleMoveScript : MonoBehaviour
     [SerializeField] private GameObject bottlePrefab;
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private float spawnInterval = 2f;
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float moveSpeed = 4f;
     
     private float timeSinceLastSpawn = 0f;
 
