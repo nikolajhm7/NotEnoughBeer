@@ -8,6 +8,8 @@ public class BottleTimingZone : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI missedText;
     [SerializeField] private BottleGameManager gameManager;
+    [SerializeField] private Sprite bottleWithCapSprite;
+    [SerializeField] private Vector3 buttonOffset = new Vector3(0.6f, 2, 0);
     
     private bool isInZone = false;
     private GameObject currentBottle = null;
@@ -20,6 +22,14 @@ public class BottleTimingZone : MonoBehaviour
 
     void Update()
     {
+        // Update button text position to follow the bottle
+        if (currentBottle != null && buttonDisplayText != null)
+        {
+            Vector3 worldPosition = currentBottle.transform.position + buttonOffset;
+            Vector3 screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
+            buttonDisplayText.transform.position = screenPosition;
+        }
+        
         if (Keyboard.current != null)
         {
             // Check for the required key input using new Input System
@@ -64,6 +74,7 @@ public class BottleTimingZone : MonoBehaviour
             if (buttonDisplayText != null)
             {
                 buttonDisplayText.text = requiredKey.ToString();
+                buttonDisplayText.gameObject.SetActive(true);
             }
         }
     }
@@ -84,6 +95,7 @@ public class BottleTimingZone : MonoBehaviour
             if (buttonDisplayText != null)
             {
                 buttonDisplayText.text = "";
+                buttonDisplayText.gameObject.SetActive(false);
             }
         }
     }
@@ -96,9 +108,25 @@ public class BottleTimingZone : MonoBehaviour
         UpdateScoreUI();
         
         bottleCaught = true;
-        Destroy(currentBottle);
+        
+        // Change the bottle sprite to show it has a cap
+        if (currentBottle != null && bottleWithCapSprite != null)
+        {
+            SpriteRenderer spriteRenderer = currentBottle.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sprite = bottleWithCapSprite;
+            }
+        }
+        
         currentBottle = null;
         isInZone = false;
+        
+        // Hide button text
+        if (buttonDisplayText != null)
+        {
+            buttonDisplayText.gameObject.SetActive(false);
+        }
         
         // Notify game manager
         if (gameManager != null)
@@ -129,6 +157,7 @@ public class BottleTimingZone : MonoBehaviour
         if (buttonDisplayText != null)
         {
             buttonDisplayText.text = "";
+            buttonDisplayText.gameObject.SetActive(false);
         }
         
         // Notify game manager

@@ -36,7 +36,7 @@ public class BottleGameManager : MonoBehaviour
     [SerializeField] private Transform secondBottomPart;
     [SerializeField] private Transform middlePart;
     [SerializeField] private float stepDistance = 0.02f;
-    [SerializeField] private float moveDuration = 0.1f;
+    [SerializeField] private float moveDuration = 0.05f;
     
     [Header("Settings")]
     [SerializeField] private int countdownTime = 3;
