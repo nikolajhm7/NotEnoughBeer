@@ -37,6 +37,7 @@ public class BottleGameManager : MonoBehaviour
     [SerializeField] private Transform middlePart;
     [SerializeField] private float stepDistance = 0.02f;
     [SerializeField] private float moveDuration = 0.05f;
+    [SerializeField] private float returnDuration = 0.5f;
     
     [Header("Settings")]
     [SerializeField] private int countdownTime = 3;
@@ -309,12 +310,12 @@ public class BottleGameManager : MonoBehaviour
         // Hold briefly at the bottom
         yield return new WaitForSeconds(0.1f);
         
-        // Return all parts to original positions
+        // Return all parts to original positions slowly
         elapsed = 0f;
-        while (elapsed < moveDuration)
+        while (elapsed < returnDuration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / moveDuration;
+            float t = elapsed / returnDuration;
             
             if (bottomPart != null)
                 bottomPart.localPosition = Vector3.Lerp(bottomStep3, bottomOriginal, t);

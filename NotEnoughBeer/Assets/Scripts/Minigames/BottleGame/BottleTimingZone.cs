@@ -81,14 +81,30 @@ public class BottleTimingZone : MonoBehaviour
 
     void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Bottle") && currentBottle == other.gameObject)
+        if (other.CompareTag("Bottle") && currentBottle == other.gameObject && !bottleCaught)
         {
+            // Mark as caught immediately to prevent re-entry
+            bottleCaught = true;
             isInZone = false;
-            // Only call OnMissedBottle if the bottle wasn't caught
-            if (!bottleCaught)
+            
+            // Store reference before clearing
+            GameObject missedBottle = currentBottle;
+            currentBottle = null;
+            
+            // Call miss logic
+            OnMissedBottle(missedBottle);
+            
+            // Clear UI text
+            if (buttonDisplayText != null)
             {
-                OnMissedBottle();
+                buttonDisplayText.text = "";
+                buttonDisplayText.gameObject.SetActive(false);
             }
+        }
+        else if (other.CompareTag("Bottle") && currentBottle == other.gameObject)
+        {
+            // Bottle was already caught/processed, just clean up
+            isInZone = false;
             currentBottle = null;
             
             // Clear UI text
@@ -149,7 +165,18 @@ public class BottleTimingZone : MonoBehaviour
         UpdateMissedUI();
         
         bottleCaught = true; // Prevent counting as missed again when exiting zone
-        Destroy(currentBottle);
+        
+        // Make the bottle shake
+        if (currentBottle != null)
+        {
+            BottleScript bottleScript = currentBottle.GetComponent<BottleScript>();
+            if (bottleScript != null)
+            {
+                bottleScript.Shake();
+            }
+        }
+        
+        // Keep the bottle on the conveyor - just clear the reference
         currentBottle = null;
         isInZone = false;
         
@@ -167,7 +194,7 @@ public class BottleTimingZone : MonoBehaviour
         }
     }
 
-    void OnMissedBottle()
+    void OnMissedBottle(GameObject missedBottle)
     {
         Debug.Log("Bottle passed without pressing space!");
         // Add logic for missing the bottle completely

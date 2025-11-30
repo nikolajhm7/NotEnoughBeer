@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 3aa219b3f012dd34abf720ab0e5399ff
+guid: 0fb7024f6e625914fa43f15813bb4b7f
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -97,7 +97,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BottleWithCap_0
+      name: BottleWithCap 1_0
       rect:
         serializedVersion: 2
         x: 393
@@ -112,8 +112,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c1b2987102e214c4a93aa824a3ab1a8c
-      internalID: -735697740
+      spriteID: 079d4ebff3c51774dab34fbebe403c7d
+      internalID: -1865656707
       vertices: []
       indices: 
       edges: []
@@ -122,7 +122,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 738cf3dc587bb064382d0f4bb49c56ca
+    spriteID: 16022675929916042897eefb87640c4c
     internalID: 0
     vertices: []
     indices: 
@@ -134,7 +134,7 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      BottleWithCap_0: -735697740
+      BottleWithCap 1_0: -1865656707
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
