@@ -50,8 +50,7 @@ public class PlayerInteractor : MonoBehaviour
 
         var kb = Keyboard.current;
 		var mouse = Mouse.current;
-		if ((kb != null && kb[InteractKey].wasPressedThisFrame) ||
-	(mouse != null && mouse.leftButton.wasPressedThisFrame))
+		if ((kb != null && kb[InteractKey].wasPressedThisFrame)) 
         {
             current?.Interact(this);
         }
