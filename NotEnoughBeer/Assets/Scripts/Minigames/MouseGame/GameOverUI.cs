@@ -10,7 +10,7 @@ public class GameOverUI : MonoBehaviour
 	public TMP_Text highScoreText;
 
 	[Header("Settings")]
-	public string continueSceneName /*= "Nikolaj Scene"*/;     
+	public string continueSceneName = "Main";     
 
 	private void Start()
 	{
