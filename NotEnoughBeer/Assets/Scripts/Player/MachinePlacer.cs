@@ -22,14 +22,28 @@ public class MachinePlacer : MonoBehaviour
     readonly List<Vector2Int> invalidOcc = new();
 
     int manualRotation = 0;
+    bool isEquipped = false;
 
     void Update()
     {
         var kb = Keyboard.current; var mouse = Mouse.current;
         if (kb == null || mouse == null || grid == null || mover == null) return;
 
-        if (kb.bKey.wasPressedThisFrame) Equip(defaultMachine);
+        if (kb.bKey.wasPressedThisFrame)
+        {
+            if (isEquipped)
+            {
+                Unequip();
+            }
+            else
+            {
+                Equip(defaultMachine);
+            }
 
+            isEquipped = !isEquipped;
+        }
+
+        // Debug money add (for testing)
         if (kb.gKey.wasPressedThisFrame && Currency.Instance != null)
         {
             Currency.Instance.AddCurrency(10);
@@ -53,7 +67,7 @@ public class MachinePlacer : MonoBehaviour
     // Allow UI to equip a machine for placement.
     public void EquipFromUI(MachineDefinition def)
     {
-        Equip(def);  // uses your existing private Equip(...)
+        Equip(def);
     }
 
 
