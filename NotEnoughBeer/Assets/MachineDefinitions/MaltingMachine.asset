@@ -13,14 +13,18 @@ MonoBehaviour:
   m_Name: MaltingMachine
   m_EditorClassIdentifier: 
   id: malting_machine
-  prefab: {fileID: 2594234705684610545, guid: 5d92808b1cd5b624ebee3a5a448f0f3f, type: 3}
+  prefab: {fileID: 1045860063181058821, guid: e1f548f81ce0eb84ca0d8c040ad79192, type: 3}
   cost: 100
   occupiedOffsets:
   - {x: 0, y: 0}
-  affectedOffsets:
+  - {x: 1, y: 0}
+  - {x: 1, y: 1}
   - {x: 0, y: 1}
-  - {x: 0, y: 2}
-  - {x: 0, y: 3}
+  affectedOffsets:
+  - {x: 0, y: 0}
+  - {x: 1, y: 0}
+  - {x: 1, y: 1}
+  - {x: 0, y: 1}
   occupiedOk: {r: 0.35, g: 0.9, b: 0.35, a: 1}
   occupiedBad: {r: 0.9, g: 0.35, b: 0.35, a: 1}
   affectedTint: {r: 0.35, g: 0.7, b: 1, a: 0.9}

@@ -13,14 +13,18 @@ MonoBehaviour:
   m_Name: FermentationMachine
   m_EditorClassIdentifier: 
   id: fermentation_machine
-  prefab: {fileID: 3159221718080070508, guid: f2dcbbb68833bb9489ee2d53c1f11b9b, type: 3}
+  prefab: {fileID: 4901419069018982722, guid: 939319c1a72918a4c9c0423e2edccffa, type: 3}
   cost: 100
   occupiedOffsets:
   - {x: 0, y: 0}
-  affectedOffsets:
+  - {x: 1, y: 0}
+  - {x: 1, y: 1}
   - {x: 0, y: 1}
-  - {x: 0, y: 2}
-  - {x: 0, y: 3}
+  affectedOffsets:
+  - {x: 0, y: 0}
+  - {x: 1, y: 0}
+  - {x: 1, y: 1}
+  - {x: 0, y: 1}
   occupiedOk: {r: 0.35, g: 0.9, b: 0.35, a: 1}
   occupiedBad: {r: 0.9, g: 0.35, b: 0.35, a: 1}
   affectedTint: {r: 0.35, g: 0.7, b: 1, a: 0.9}

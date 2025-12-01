@@ -13,14 +13,18 @@ MonoBehaviour:
   m_Name: MashingMachine
   m_EditorClassIdentifier: 
   id: mashing_machine
-  prefab: {fileID: 899625150378101002, guid: 003b0ec806fbc074a832ef10d4a3f23a, type: 3}
+  prefab: {fileID: 2257093576052749244, guid: 9bdcc84da752d2642a20057dc9e1592e, type: 3}
   cost: 100
   occupiedOffsets:
   - {x: 0, y: 0}
-  affectedOffsets:
+  - {x: 1, y: 0}
+  - {x: 1, y: 1}
   - {x: 0, y: 1}
-  - {x: 0, y: 2}
-  - {x: 0, y: 3}
+  affectedOffsets:
+  - {x: 0, y: 0}
+  - {x: 1, y: 0}
+  - {x: 1, y: 1}
+  - {x: 0, y: 1}
   occupiedOk: {r: 0.35, g: 0.9, b: 0.35, a: 1}
   occupiedBad: {r: 0.9, g: 0.35, b: 0.35, a: 1}
   affectedTint: {r: 0.35, g: 0.7, b: 1, a: 0.9}

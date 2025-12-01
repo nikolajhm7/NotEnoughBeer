@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -20,6 +21,8 @@ public class MachinePlacer : MonoBehaviour
     readonly List<Vector2Int> affCells = new();
     readonly List<Vector2Int> invalidOcc = new();
 
+    int manualRotation = 0;
+
     void Update()
     {
         var kb = Keyboard.current; var mouse = Mouse.current;
@@ -30,6 +33,12 @@ public class MachinePlacer : MonoBehaviour
         if (kb.gKey.wasPressedThisFrame && Currency.Instance != null)
         {
             Currency.Instance.AddCurrency(10);
+        }
+
+        if (kb.rKey.wasPressedThisFrame)
+        {
+            Debug.Log("Rotating placement preview.");
+            manualRotation = (manualRotation + 1) % 4;
         }
 
         if (currentDef != null)
@@ -72,24 +81,34 @@ public class MachinePlacer : MonoBehaviour
     void UpdatePreviewAndHighlights()
     {
         var anchor = mover.CurrentCell + mover.CurrentFacingDir;
-        int fi = FacingToIndex(mover.CurrentFacingDir);
+        int fi = (FacingToIndex(mover.CurrentFacingDir) + manualRotation) % 4;
 
         // position/rotate ghost
         if (ghost)
         {
             ghost.transform.rotation = Quaternion.Euler(0f, fi * 90f, 0f);
 
-            var baseXZ = grid.GridToWorld(anchor);
             float y = grid.GetFloorTopY(anchor) + grid.GetObjectExtentsY(ghost);
-            ghost.transform.position = new Vector3(baseXZ.x, y, baseXZ.z);
+
+            Vector3 baseXZ = grid.GridToWorld(anchor);
+            Vector2 center = GetFootprintCenter(currentDef.occupiedOffsets, fi);
+
+            Vector3 worldOffset = new(center.x * grid.tileSize,
+                                              0f,
+                                              center.y * grid.tileSize);
+
+            Vector3 finalPos = baseXZ + worldOffset;
+            finalPos.y = y;
+
+            ghost.transform.position = finalPos;
         }
 
-        // --- compute cells
+        // compute cells
         BuildRotatedCells(currentDef.occupiedOffsets, anchor, fi, occCells);
         BuildRotatedCells(currentDef.affectedOffsets, anchor, fi, affCells);
         FindInvalidOccupied(occCells, invalidOcc);
 
-        // --- draw highlights (clear once per frame, then layer colors)
+        // draw highlights (clear once per frame, then layer colors)
         grid.ClearAllTints();
 
         // Occupied footprint tiles
@@ -120,10 +139,9 @@ public class MachinePlacer : MonoBehaviour
     bool TryPlace()
     {
         var anchor = mover.CurrentCell + mover.CurrentFacingDir;
-        int fi = FacingToIndex(mover.CurrentFacingDir);
+        int fi = (FacingToIndex(mover.CurrentFacingDir) + manualRotation) % 4;
 
         var baseXZ = grid.GridToWorld(anchor);
-
 
         BuildRotatedCells(currentDef.occupiedOffsets, anchor, fi, occCells);
         invalidOcc.Clear();
@@ -150,13 +168,24 @@ public class MachinePlacer : MonoBehaviour
     {
         Currency.Instance.SpendCurrency(currentDef.cost);
 
+
         // place
         var go = Instantiate(currentDef.prefab,
                              baseXZ,
                              Quaternion.Euler(0f, facingIndex * 90f, 0f));
 
         float placeY = grid.GetFloorTopY(anchor) + grid.GetObjectExtentsY(go);
-        go.transform.position = new Vector3(baseXZ.x, placeY, baseXZ.z);
+
+        Vector2 center = GetFootprintCenter(currentDef.occupiedOffsets, facingIndex);
+
+        Vector3 worldOffset = new(center.x * grid.tileSize,
+                                          0f,
+                                          center.y * grid.tileSize);
+
+        Vector3 finalPos = baseXZ + worldOffset;
+        finalPos.y = placeY;
+
+        go.transform.position = finalPos;
 
         var inst = go.AddComponent<MachineInstance>();
         inst.def = currentDef;
@@ -225,5 +254,38 @@ public class MachinePlacer : MonoBehaviour
         => (dir == Vector2Int.up) ? 0 :
            (dir == Vector2Int.right) ? 1 :
            (dir == Vector2Int.down) ? 2 : 3;
+
+    Bounds GetPrefabXZBounds(GameObject prefab)
+    {
+        var renderers = prefab.GetComponentsInChildren<Renderer>();
+        if (renderers.Length == 0)
+            return new Bounds(Vector3.zero, Vector3.zero);
+
+        Bounds b = renderers[0].bounds;
+        foreach (var r in renderers)
+            b.Encapsulate(r.bounds);
+
+        return b;
+    }
+
+    Vector2 GetFootprintCenter(Vector2Int[] offsets, int facingIndex)
+    {
+        float sumX = 0f, sumY = 0f;
+
+        foreach (var offset in offsets)
+        {
+            Vector2Int v = offset;
+            for (int i = 0; i < facingIndex; i++)
+            {
+                v = new Vector2Int(v.y, -v.x); // 90° cw
+            }
+
+            sumX += v.x;
+            sumY += v.y;
+        }
+
+        int count = offsets.Length;
+        return new Vector2(sumX / count, sumY / count);
+    }
     #endregion Helpers
 }
