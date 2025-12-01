@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0da5dcb2d47f9a047ac90bfa689206e6, type: 3}
+  m_Name: ConditioningMachine
+  m_EditorClassIdentifier: 
+  id: conditioning_machine
+  prefab: {fileID: 216450507870206608, guid: 4306a67a04592b74393cdbd337af51c0, type: 3}
+  cost: 300
+  occupiedOffsets:
+  - {x: 0, y: 0}
+  affectedOffsets:
+  - {x: 0, y: 1}
+  - {x: 0, y: 2}
+  - {x: 0, y: 3}
+  occupiedOk: {r: 0.35, g: 0.9, b: 0.35, a: 1}
+  occupiedBad: {r: 0.9, g: 0.35, b: 0.35, a: 1}
+  affectedTint: {r: 0.35, g: 0.7, b: 1, a: 0.9}

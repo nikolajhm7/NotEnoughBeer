@@ -14,19 +14,24 @@ public class SimpleShopUI_List : MonoBehaviour
     [SerializeField] List<MachineDefinition> catalog = new List<MachineDefinition>();
     [SerializeField] MachinePlacer placer;               // drag your MachinePlacer here
 
-    [Header("Sell (RIGHT) - placeholder beer")]
+    [Header("Sell (RIGHT) - beer")]
     [SerializeField] TMP_Text beerCountText;
     [SerializeField] TMP_Text unitPriceText;
     [SerializeField] Button sellAllButton;
     [SerializeField] Button addBeerDebugButton;
     [SerializeField] int sellPricePerUnit = 10;
-    int beerCount = 0;
 
     [Header("HUD")]
     [SerializeField] TMP_Text moneyText;
     [SerializeField] TMP_Text toastText;
 
+    [Header("Garage Upgrade")]
+    [SerializeField] GridManager grid;
+    [SerializeField] Button upgradeGarageButton;
+    [SerializeField] int garageUpgradeCost = 200;
+
     public bool IsOpen => rootPanel && rootPanel.activeSelf;
+
     readonly List<GameObject> _spawnedRows = new List<GameObject>();
 
     void Awake()
@@ -34,23 +39,27 @@ public class SimpleShopUI_List : MonoBehaviour
         Hide();
         BuildList();
         HookSell();
+        HookGarageUpgrade();
         RefreshAll();
     }
 
     public void Open()
     {
         if (rootPanel) rootPanel.SetActive(true);
-        Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         RefreshAll();
     }
+
     public void Hide()
     {
         if (rootPanel) rootPanel.SetActive(false);
     }
 
-    // ---------- BUY (equip for MachinePlacer) ----------
+    // ---------- BUY LIST (machines + ingredients) ----------
     void BuildList()
     {
+        // clear old rows
         foreach (var go in _spawnedRows) Destroy(go);
         _spawnedRows.Clear();
 
@@ -64,25 +73,126 @@ public class SimpleShopUI_List : MonoBehaviour
             var price = row.transform.Find("Price")?.GetComponent<TMP_Text>();
             var btn = row.transform.Find("BuyButton")?.GetComponent<Button>();
 
-            if (name) name.text = string.IsNullOrEmpty(def.id) ? def.name : def.id; // fallback to asset name
+            var label = string.IsNullOrEmpty(def.id) ? def.name : def.id;
+
+            if (name) name.text = label;
             if (price) price.text = $"$ {def.cost}";
             if (btn)
             {
                 btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(() => Equip(def));
+                btn.onClick.AddListener(() => OnClickCatalogEntry(def));
             }
         }
     }
 
+    void OnClickCatalogEntry(MachineDefinition def)
+    {
+        if (def == null) return;
+        if (Currency.Instance == null)
+        {
+            Toast("No Currency in scene.");
+            return;
+        }
+
+        var id = string.IsNullOrEmpty(def.id) ? "" : def.id.ToLower();
+
+        switch (id)
+        {
+            case "barley":
+                BuyBarley(def);
+                break;
+            case "yeast":
+                BuyYeast(def);
+                break;
+            case "bottles":
+                BuyBottles(def);
+                break;
+            default:
+                Equip(def); // normal machine
+                break;
+        }
+    }
+
+    void BuyBarley(MachineDefinition def)
+    {
+        if (!Currency.Instance.SpendCurrency(def.cost))
+        {
+            Toast("Not enough money.");
+            return;
+        }
+
+        if (IngredientStorage.Instance != null)
+        {
+            int amount = 10;
+            IngredientStorage.Instance.AddBarley(amount);
+            Toast($"Bought {amount} barley.");
+        }
+        else
+        {
+            Toast("No IngredientStorage in scene.");
+        }
+
+        RefreshAll();
+    }
+
+    void BuyYeast(MachineDefinition def)
+    {
+        if (!Currency.Instance.SpendCurrency(def.cost))
+        {
+            Toast("Not enough money.");
+            return;
+        }
+
+        if (IngredientStorage.Instance != null)
+        {
+            int amount = 5;
+            IngredientStorage.Instance.Yeast += amount;
+            Toast($"Bought {amount} yeast.");
+        }
+        else
+        {
+            Toast("No IngredientStorage in scene.");
+        }
+
+        RefreshAll();
+    }
+
+    void BuyBottles(MachineDefinition def)
+    {
+        if (!Currency.Instance.SpendCurrency(def.cost))
+        {
+            Toast("Not enough money.");
+            return;
+        }
+
+        if (IngredientStorage.Instance != null)
+        {
+            int amount = 12;
+            IngredientStorage.Instance.Bottles += amount;
+            Toast($"Bought {amount} bottles.");
+        }
+        else
+        {
+            Toast("No IngredientStorage in scene.");
+        }
+
+        RefreshAll();
+    }
+
     void Equip(MachineDefinition def)
     {
-        if (!placer) { Toast("No MachinePlacer assigned."); return; }
+        if (!placer)
+        {
+            Toast("No MachinePlacer assigned.");
+            return;
+        }
+
         placer.EquipFromUI(def);                // ghost + spending handled by MachinePlacer
         Toast($"Equipped {def.name}. Place with Space or LMB.");
         Hide();                                 // optional: close shop so player can place immediately
     }
 
-    // ---------- SELL (placeholder) ----------
+    // ---------- SELL ----------
     void HookSell()
     {
         if (sellAllButton)
@@ -90,13 +200,29 @@ public class SimpleShopUI_List : MonoBehaviour
             sellAllButton.onClick.RemoveAllListeners();
             sellAllButton.onClick.AddListener(() =>
             {
-                if (Currency.Instance == null) { Toast("No Currency in scene."); return; }
-                if (beerCount <= 0) { Toast("No beer to sell."); return; }
+                if (Currency.Instance == null)
+                {
+                    Toast("No Currency in scene.");
+                    return;
+                }
 
-                int payout = beerCount * sellPricePerUnit;
-                beerCount = 0;
+                if (BeerStorage.Instance == null)
+                {
+                    Toast("No BeerStorage in scene.");
+                    return;
+                }
+
+                int totalBottles;
+                int payout = BeerStorage.Instance.SellAll(out totalBottles);
+
+                if (totalBottles <= 0)
+                {
+                    Toast("No beer to sell.");
+                    return;
+                }
+
                 Currency.Instance.AddCurrency(payout);
-                Toast($"Sold beer for ${payout}.");
+                Toast($"Sold {totalBottles} bottles for ${payout}.");
                 RefreshAll();
             });
         }
@@ -106,23 +232,68 @@ public class SimpleShopUI_List : MonoBehaviour
             addBeerDebugButton.onClick.RemoveAllListeners();
             addBeerDebugButton.onClick.AddListener(() =>
             {
-                beerCount += 5; // simulate production
+                BeerStorage.Instance?.AddBeer(5); // common debug
                 RefreshSellTexts();
             });
         }
     }
 
+
+    // ---------- GARAGE UPGRADE ----------
+    void HookGarageUpgrade()
+    {
+        if (!upgradeGarageButton || !grid) return;
+
+        upgradeGarageButton.onClick.RemoveAllListeners();
+        upgradeGarageButton.onClick.AddListener(() =>
+        {
+            if (Currency.Instance == null)
+            {
+                Toast("No Currency in scene.");
+                return;
+            }
+
+            if (!Currency.Instance.SpendCurrency(garageUpgradeCost))
+            {
+                Toast("Not enough money to upgrade garage.");
+                return;
+            }
+
+            grid.Expand(addRight: 1, addLeft: 1, addUp: 1, addDown: 1);
+            Toast("Garage upgraded!");
+            RefreshAll();
+        });
+    }
+
     // ---------- UI refresh ----------
-    void RefreshAll() { RefreshMoney(); RefreshSellTexts(); }
+    void RefreshAll()
+    {
+        RefreshMoney();
+        RefreshSellTexts();
+    }
+
     void RefreshMoney()
     {
-        if (moneyText) moneyText.text =
-            Currency.Instance ? $"$ {Currency.Instance.CurrencyAmount}" : "$ 0";
+        if (moneyText)
+        {
+            moneyText.text =
+                Currency.Instance ? $"$ {Currency.Instance.CurrencyAmount}" : "$ 0";
+        }
     }
+
     void RefreshSellTexts()
     {
-        if (unitPriceText) unitPriceText.text = $"$ {sellPricePerUnit}/unit";
-        if (beerCountText) beerCountText.text = $"{beerCount} units";
+        if (unitPriceText) unitPriceText.text = "Value varies by rarity";
+        if (beerCountText)
+        {
+            int count = BeerStorage.Instance ? BeerStorage.Instance.TotalBottles : 0;
+            beerCountText.text = $"{count} units";
+        }
     }
-    void Toast(string msg) { if (toastText) toastText.text = msg; }
+
+
+    void Toast(string msg)
+    {
+        if (toastText) toastText.text = msg;
+    }
 }
