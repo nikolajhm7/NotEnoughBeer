@@ -39,8 +39,6 @@ public class MachinePlacer : MonoBehaviour
             {
                 Equip(defaultMachine);
             }
-
-            isEquipped = !isEquipped;
         }
 
         // Debug money add (for testing)
@@ -82,6 +80,8 @@ public class MachinePlacer : MonoBehaviour
         if (ghost) Destroy(ghost);
         ghost = Instantiate(currentDef.prefab);
         SetGhostVisual(ghost, true);
+
+        isEquipped = true;
     }
 
     void Unequip()
@@ -90,6 +90,8 @@ public class MachinePlacer : MonoBehaviour
         currentDef = null;
         if (ghost) Destroy(ghost);
         ghost = null;
+
+        isEquipped = false;
     }
 
     void UpdatePreviewAndHighlights()

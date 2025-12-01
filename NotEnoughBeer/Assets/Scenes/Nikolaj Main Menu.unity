@@ -1675,7 +1675,7 @@ MonoBehaviour:
     Clip: {fileID: 8300000, guid: 8e5871396c1e33d4fb7cefae63b0d060, type: 3}
   PlayFirstClipOnStart: 1
   CrossfadeDuration: 1.5
-  Volume: 1
+  Volume: 0.06
 --- !u!4 &1554296762
 Transform:
   m_ObjectHideFlags: 0
