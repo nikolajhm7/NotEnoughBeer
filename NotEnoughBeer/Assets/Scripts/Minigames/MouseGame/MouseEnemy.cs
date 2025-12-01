@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class MouseEnemy : MonoBehaviour, IInteractable, IDamageable
 {
@@ -7,11 +7,24 @@ public class MouseEnemy : MonoBehaviour, IInteractable, IDamageable
 
 	Vector2Int currentCell;
 
-	public int Priority => 5; // hvis flere interactables, er musen rimelig vigtig
+	public int Priority => 5;
+	private Vector3 lastPos;
+
+	[Header("Score")]
+	public float startScore = 20f;          
+	public float scoreDecayPerSecond = 0.5f;  
+	private float timeAlive = 0f;
+
+	public static int totalDead = 0;
 
 	void Awake()
 	{
 		if (!grid) grid = FindObjectOfType<GridManager>();
+	}
+
+	void Start()
+	{
+		lastPos = transform.position;
 	}
 
 	void OnEnable()
@@ -21,7 +34,22 @@ public class MouseEnemy : MonoBehaviour, IInteractable, IDamageable
 
 	void Update()
 	{
-		// hvis den bevæger sig (fx RandomWalker), hold registreringen ajour
+		timeAlive += Time.deltaTime;
+		Vector3 delta = transform.position - lastPos;
+		delta.y = 0f;
+
+
+		if (delta.sqrMagnitude > 0.0001f)
+		{
+			Quaternion targetRot = Quaternion.LookRotation(delta, Vector3.up);
+
+			
+			targetRot *= Quaternion.Euler(0f, -90f, 0f);
+
+			transform.rotation = targetRot;
+		}
+
+		lastPos = transform.position;
 		UpdateCell(force: false);
 	}
 
@@ -38,21 +66,45 @@ public class MouseEnemy : MonoBehaviour, IInteractable, IDamageable
 		}
 	}
 
-	// --- IInteractable: bruges kun hvis du også vil kunne trykke [F], men skader ikke at have med ---
+	
 	public bool CanInteract(PlayerInteractor interactor) => true;
 	public void Interact(PlayerInteractor interactor) => Die();
-	public string GetInteractionDescription(PlayerInteractor interactor) => "Slå musen (insta-kill)";
+	public string GetInteractionDescription(PlayerInteractor interactor) => "Hit";
 
-	// --- IDamageable: kaldt af Bobs slag ---
+	
 	public void TakeDamage(int amount)
 	{
-		// Ignorer amount – musen dør af første hit
+		
 		Die();
 	}
 
 	void Die()
 	{
+		
+		if (ScoreSystem.Instance != null)
+		{
+			float rawScore = startScore - timeAlive * scoreDecayPerSecond;
+			int points = Mathf.Max(0, Mathf.RoundToInt(rawScore));
+			ScoreSystem.Instance.AddScore(points);
+		}
+
+		
 		if (grid) grid.UnregisterInteractable(this);
+
+
+		totalDead++;
+		Debug.Log($"Mouse died. totalDead={totalDead}, totalSpawned={ObjectSpawner.totalSpawned}, finishedSpawning={ObjectSpawner.finishedSpawning}");
+
+		if (ObjectSpawner.finishedSpawning &&
+			totalDead >= ObjectSpawner.totalSpawned)
+		{
+			Debug.Log("Alle mus dÃ¸de -> EndRound()");
+			if (RoundManager.Instance != null)
+				RoundManager.Instance.EndRound();
+			else
+				Debug.LogWarning("RoundManager.Instance er NULL");
+		}
+
 		Destroy(gameObject);
 	}
 

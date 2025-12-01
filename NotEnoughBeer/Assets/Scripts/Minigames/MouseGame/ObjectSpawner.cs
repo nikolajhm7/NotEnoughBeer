@@ -10,18 +10,27 @@ public class ObjectSpawner : MonoBehaviour
 	public GameObject prefab;
 
 	[Header("Spawn")]
-	public int count = 5;
-	public bool avoidPerimeter = true;   // hold afstand til ydre kant/vægge
-	public int perimeterMargin = 1;      // 1 celle fra kanten
+	public int count = 10;
+	public bool avoidPerimeter = true;   
+	public int perimeterMargin = 1;      
 
 	[Header("Walker Settings (optional)")]
 	public float moveSpeed = 3f;
 	public float stepPause = 0.1f;
 
+	public static int totalToSpawn;        
+	public static int totalSpawned;        
+	public static bool finishedSpawning;
+
 	void Start()
 	{
 		if (!grid) grid = FindObjectOfType<GridManager>();
 		if (!grid || !prefab) { Debug.LogWarning("Missing GridManager or prefab"); return; }
+
+		totalToSpawn = count;
+		totalSpawned = 0;
+		finishedSpawning = false;
+		MouseEnemy.totalDead = 0;
 
 		_ = SpawnMany();
 	}
@@ -61,29 +70,37 @@ public class ObjectSpawner : MonoBehaviour
 			SpawnOneAt(cell);
 			spawned++;
 
+			if (spawned >= count)
+			{
+				finishedSpawning = true;   
+				break;
+			}
+
 			await Task.Delay(3000);
 		}
+	
 	}
 
 	void SpawnOneAt(Vector2Int cell)
 	{
 		Vector3 world = grid.GridToWorld(cell);
 
-		// Sæt Y korrekt på toppen af gulv + halv højde af objekt
+		
 		float floorTop = grid.GetFloorTopY(cell);
 		var go = Instantiate(prefab, world, Quaternion.identity);
 		float halfHeight = grid.GetObjectExtentsY(go);
 		go.transform.position = new Vector3(world.x, floorTop + halfHeight, world.z);
 
-		// (Valgfrit) Markér startcellen som optaget, hvis du vil undgå overlap.
-		// grid.SetOccupied(new[]{ cell }, true);
+		
 
-		// Giv den en RandomWalker, hvis ikke den har
+		
 		var walker = go.GetComponent<RandomWalker>();
 		if (!walker) walker = go.AddComponent<RandomWalker>();
 		walker.Init(grid, cell, moveSpeed, stepPause);
 		var enemy = go.GetComponent<MouseEnemy>();
 		if (!enemy) enemy = go.AddComponent<MouseEnemy>();
 		enemy.grid = grid;
+
+		totalSpawned++;
 	}
 }

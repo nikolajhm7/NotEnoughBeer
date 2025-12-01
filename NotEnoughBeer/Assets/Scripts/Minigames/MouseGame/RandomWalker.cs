@@ -12,7 +12,7 @@ public class RandomWalker : MonoBehaviour
 	float pause = 0.1f;
 	bool isMoving;
 
-	// (Valgfrit) undgå at to walkers står i samme celle:
+	
 	bool useOccupancy = false;
 
 	public void Init(GridManager g, Vector2Int startCell, float moveSpeed = 3f, float stepPause = 0.1f, bool useOcc = false)

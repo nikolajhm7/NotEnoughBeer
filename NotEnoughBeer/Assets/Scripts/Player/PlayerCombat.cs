@@ -9,7 +9,7 @@ public class PlayerCombat : MonoBehaviour
 	public PlayerMovement Movement;
 
 	[Header("Settings")]
-	public float attackCooldown = 0.2f; // lidt debounce
+	public float attackCooldown = 0.2f; 
 	private float lastAttackTime = -999f;
 
 	void Start()
@@ -37,16 +37,16 @@ public class PlayerCombat : MonoBehaviour
 		// Cellen foran Bob
 		Vector2Int targetCell = Movement.CurrentCell + Movement.CurrentFacingDir;
 
-		// Find alle registrerede interactables i cellen
+		
 		var hits = Grid.GetInteractablesAt(targetCell).ToList();
-		if (hits.Count == 0) return; // intet i cellen – "sving i luften"
+		if (hits.Count == 0) return; 
 
-		// Dræb alt i cellen der kan tage skade (musen dør instant)
-		foreach (var h in hits)
+		
+		foreach (var hit in hits)
 		{
-			if (h is IDamageable d)
+			if (hit is IDamageable d)
 			{
-				d.TakeDamage(1); // dør straks uanset værdi
+				d.TakeDamage(1); 
 			}
 		}
 	}
