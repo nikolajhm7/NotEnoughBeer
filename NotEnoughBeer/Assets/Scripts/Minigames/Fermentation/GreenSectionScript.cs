@@ -3,23 +3,23 @@ using UnityEngine;
 public class GreenSectionScript : MonoBehaviour
 {
     [SerializeField] private LineRenderer lineRenderer;
-    [SerializeField] private float outerRadius = 5f;
-    [SerializeField] private float innerRadius = 4.2f;
+    [SerializeField] private float outerRadius = 23.55f;
+    [SerializeField] private float innerRadius = 23.95f;
     [SerializeField] private int segments = 20; // Fewer segments for just the arc
     [SerializeField] private Material greenMaterial;
     
     [Header("Green Section Settings")]
-    [SerializeField] public float startAngle = 120f; // Start angle of the green section
-    [SerializeField] public float endAngle = 140f;   // End angle of the green section
+    [SerializeField] public float startAngle = 255f; // Start angle of the green section
+    [SerializeField] public float endAngle = 306f;   // End angle of the green section
 
     [Header("Randomizer Settings")]
-    [SerializeField] private bool enableRandomizer = false;
+    [SerializeField] private bool enableRandomizer = true;
     [SerializeField] private float initialDelay = 3f; // Delay before first randomization (seconds)
     [SerializeField] private float randomizeInterval = 3f; // How often to randomize (seconds)
     [SerializeField] private float minSectionSize = 35f; // Minimum size of green section in degrees
-    [SerializeField] private float maxSectionSize = 80f; // Maximum size of green section in degrees
-    [SerializeField] private float minAngle = 60f; // Minimum angle where green section can appear
-    [SerializeField] private float maxAngle = 300f; // Maximum angle where green section can appear
+    [SerializeField] private float maxSectionSize = 70f; // Maximum size of green section in degrees
+    [SerializeField] private float minAngle = 45f; // Minimum angle where green section can appear
+    [SerializeField] private float maxAngle = 308f; // Maximum angle where green section can appear
     [SerializeField] private bool smoothTransition = true; // Smooth transition between positions
     [SerializeField] private float transitionSpeed = 0.5f; // Speed of smooth transition
 
@@ -266,7 +266,14 @@ public class GreenSectionScript : MonoBehaviour
         if (greenMaterial == null)
         {
             greenMaterial = new Material(Shader.Find("Sprites/Default"));
-            greenMaterial.color = Color.green;
+            greenMaterial.color = new Color(0f, 1f, 0f, 1f); // Green with 50% opacity
+        }
+        else
+        {
+            // Set opacity to 50% for assigned material
+            Color materialColor = greenMaterial.color;
+            materialColor.a = 1f;
+            greenMaterial.color = materialColor;
         }
         
         lineRenderer.material = greenMaterial; 
@@ -292,7 +299,7 @@ public class GreenSectionScript : MonoBehaviour
             float radius = (outerRadius + innerRadius) / 2f;
             float x = Mathf.Cos(visualAngle) * radius;
             float y = Mathf.Sin(visualAngle) * radius;
-            lineRenderer.SetPosition(i, new Vector3(x, y, 0.01f)); // Slightly forward to appear on top
+            lineRenderer.SetPosition(i, new Vector3(x, y, 2f)); // Position at z=2
         }
     }
 

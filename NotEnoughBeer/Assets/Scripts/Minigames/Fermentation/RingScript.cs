@@ -168,6 +168,9 @@ public class RingScript : MonoBehaviour
         lineRenderer.positionCount = segments + 1;
         lineRenderer.useWorldSpace = false;
         lineRenderer.loop = true;
+        
+        // Hide the red ring visually (still tracks in background)
+        lineRenderer.enabled = false;
 
         // Generate ring points
         for (int i = 0; i <= segments; i++)
