@@ -237,7 +237,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minigameSceneName: Milo Scene
-  triggerKey: 1
+  triggerKey: 30
   enableRandomAttacks: 0
   minDelay: 30
   maxDelay: 90
