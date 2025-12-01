@@ -143,6 +143,15 @@ public class FermentationGameManager : MonoBehaviour
         Debug.Log($"Final Scores: {greenPercentage:F1}%");
         
         OnGameEnd?.Invoke();
+
+        if (MinigameBridge.Instance != null)
+        {
+            MinigameBridge.Instance.FinishMinigame(greenPercentage);
+        }
+        else
+        {
+            Debug.LogWarning("No MinigameBridge found – staying in Fermentation scene.");
+        }
     }
 
     public void ResetGame()

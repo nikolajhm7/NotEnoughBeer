@@ -7,7 +7,7 @@ public class MinigameBridge : MonoBehaviour
     public static MinigameBridge Instance;
 
     private Action<float> _onComplete;
-    [SerializeField] private string mainSceneName = "Main"; // your garage scene name
+    [SerializeField] private string mainSceneName = "Main*"; // your garage scene name
 
     private void Awake()
     {

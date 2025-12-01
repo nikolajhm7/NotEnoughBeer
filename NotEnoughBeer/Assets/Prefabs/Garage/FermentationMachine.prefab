@@ -93,6 +93,6 @@ MonoBehaviour:
   missingIngredientsDescription: You don't have the required ingredients.
   wrongStageDescription: The batch is not ready for this step.
   priority: 0
-  minigameSceneName: 
+  minigameSceneName: Rasmus Scene
   autoScoreIfNoMinigame: 20
   yeastPerBatch: 1

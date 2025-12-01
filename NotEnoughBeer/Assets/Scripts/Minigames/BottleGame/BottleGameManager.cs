@@ -217,27 +217,47 @@ public class BottleGameManager : MonoBehaviour
             bottlesRemainingText.text = "Bottles: " + bottlesRemaining;
         }
     }
-    
+
     void EndGame()
     {
         Debug.Log("Game Ended!");
+
+        // Calculate score first
+        int finalScore = 0;
+        int missed = 0;
+        if (timingZone != null)
+        {
+            finalScore = timingZone.GetScore();
+            missed = timingZone.GetMissed();
+        }
+
+        // Turn that into a single float value for the batch system
+        float scoreValue = Mathf.Max(0, finalScore - missed * 0.5f);
+
+        // ===== If we came from a machine, report back and return to main =====
+        if (MinigameBridge.Instance != null)
+        {
+            MinigameBridge.Instance.FinishMinigame(scoreValue);
+            return; // we’re leaving this scene, no need to show endScreen
+        }
+
+        // ===== Fallback: old behaviour if no bridge exists =====
         // Disable game components
         if (bottleSpawner != null) bottleSpawner.enabled = false;
         if (timingZone != null) timingZone.enabled = false;
-        
+
         // Hide game UI, show end screen
         if (gameUI != null) gameUI.SetActive(false);
         if (endScreen != null) endScreen.SetActive(true);
-        
+
         // Display final score
-        if (finalScoreText != null && timingZone != null)
+        if (finalScoreText != null)
         {
-            int finalScore = timingZone.GetScore();
-            int missed = timingZone.GetMissed();
             finalScoreText.text = "Final Score: " + finalScore + "\nMissed: " + missed;
         }
     }
-    
+
+
     public void PlayBottleCapAnimation()
     {
         Debug.Log("PlayBottleCapAnimation called!");
