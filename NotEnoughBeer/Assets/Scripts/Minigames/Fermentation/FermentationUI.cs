@@ -15,8 +15,8 @@ public class FermentationUI : MonoBehaviour
     [SerializeField] private Button startButton;
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TextMeshProUGUI finalScoreText;
-    [SerializeField] private GameObject blackOverlay; // Black screen overlay
-    [SerializeField] private GameObject blurOverlay; // Semi-transparent overlay for blur effect
+    [SerializeField] private GameObject startScreen; // Start screen overlay
+    [SerializeField] private GameObject endScreen; // End screen overlay
     
     [Header("Script References")]
     [SerializeField] private GreenSectionScript greenSectionScript;
@@ -70,22 +70,19 @@ public class FermentationUI : MonoBehaviour
 
     private void SetupInitialUI()
     {
-        // Show start button, hide game over panel
+        // Show start button
         if (startButton != null)
             startButton.gameObject.SetActive(true);
-            
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(false);
             
         if (countdownText != null)
             countdownText.gameObject.SetActive(false);
             
-        // Show black overlay initially, hide blur overlay
-        if (blackOverlay != null)
-            blackOverlay.SetActive(true);
+        // Show start screen initially, hide end screen
+        if (startScreen != null)
+            startScreen.SetActive(true);
             
-        if (blurOverlay != null)
-            blurOverlay.SetActive(false);
+        if (endScreen != null)
+            endScreen.SetActive(false);
     }
 
     private void UpdateCounterDisplays()
@@ -137,7 +134,7 @@ public class FermentationUI : MonoBehaviour
     // Event handlers for game manager events
     private void OnCountdownStart()
     {
-        Debug.Log("OnCountdownStart called - hiding black overlay");
+        Debug.Log("OnCountdownStart called - hiding start screen");
         
         if (startButton != null)
             startButton.gameObject.SetActive(false);
@@ -145,15 +142,15 @@ public class FermentationUI : MonoBehaviour
         if (countdownText != null)
             countdownText.gameObject.SetActive(true);
             
-        // Hide black overlay when countdown starts (reveals minigame)
-        if (blackOverlay != null)
+        // Hide start screen when countdown starts (reveals minigame)
+        if (startScreen != null)
         {
-            Debug.Log("Black overlay found, setting it to inactive");
-            blackOverlay.SetActive(false);
+            Debug.Log("Start screen found, setting it to inactive");
+            startScreen.SetActive(false);
         }
         else
         {
-            Debug.LogError("Black overlay is NULL! Make sure it's assigned in the FermentationUI inspector");
+            Debug.LogWarning("Start screen is NULL! Make sure it's assigned in the FermentationUI inspector");
         }
     }
 
@@ -165,16 +162,13 @@ public class FermentationUI : MonoBehaviour
 
     private void OnGameEnd()
     {
-        Debug.Log("Game ended - showing blur overlay and final scores");
+        Debug.Log("Game ended - showing end screen and final scores");
         
-        // Show blur overlay to dim the background
-        if (blurOverlay != null)
-            blurOverlay.SetActive(true);
+        // Show end screen
+        if (endScreen != null)
+            endScreen.SetActive(true);
         else
-            Debug.LogWarning("Blur overlay is null - assign it in the inspector for blur effect");
-            
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(true);
+            Debug.LogWarning("End screen is null - assign it in the inspector");
             
         if (startButton != null)
             startButton.gameObject.SetActive(true);
@@ -186,6 +180,12 @@ public class FermentationUI : MonoBehaviour
             
             finalScoreText.text = $"You scored a percentage of {greenPercentage:F1}%\n\n" +
                                  GetPerformanceRating(greenPercentage);
+            finalScoreText.gameObject.SetActive(true);
+            Debug.Log($"Final score displayed: {greenPercentage:F1}%");
+        }
+        else
+        {
+            Debug.LogWarning("Final score text is null - assign it in the inspector");
         }
     }
 
@@ -250,13 +250,13 @@ public class FermentationUI : MonoBehaviour
         UpdateCounterDisplays();
         UpdateTimerDisplay();
         
-        // Show black overlay again when resetting
-        if (blackOverlay != null)
-            blackOverlay.SetActive(true);
+        // Show start screen again when resetting
+        if (startScreen != null)
+            startScreen.SetActive(true);
             
-        // Hide blur overlay when resetting
-        if (blurOverlay != null)
-            blurOverlay.SetActive(false);
+        // Hide end screen when resetting
+        if (endScreen != null)
+            endScreen.SetActive(false);
     }
 
     // Button event handlers
