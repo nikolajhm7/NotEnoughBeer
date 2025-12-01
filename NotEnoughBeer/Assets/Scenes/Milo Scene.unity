@@ -704,7 +704,7 @@ MonoBehaviour:
   panel: {fileID: 991579527}
   finalScoreText: {fileID: 223228469}
   highScoreText: {fileID: 1094192194}
-  continueSceneName: Nikolaj Scene
+  continueSceneName: Main
 --- !u!4 &605372318 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ef0abd7a210da4f4580b06612912001e, type: 3}
