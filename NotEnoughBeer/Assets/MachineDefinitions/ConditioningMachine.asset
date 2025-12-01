@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: ConditioningMachine
   m_EditorClassIdentifier: 
   id: conditioning_machine
-  prefab: {fileID: 216450507870206608, guid: 4306a67a04592b74393cdbd337af51c0, type: 3}
+  prefab: {fileID: 5648149503036158546, guid: cbfb0d7f23ef53d4793d96a812b1effd, type: 3}
   cost: 300
   occupiedOffsets:
   - {x: 0, y: 0}
-  affectedOffsets:
   - {x: 0, y: 1}
-  - {x: 0, y: 2}
-  - {x: 0, y: 3}
+  affectedOffsets:
+  - {x: 0, y: 0}
+  - {x: 0, y: 1}
   occupiedOk: {r: 0.35, g: 0.9, b: 0.35, a: 1}
   occupiedBad: {r: 0.9, g: 0.35, b: 0.35, a: 1}
   affectedTint: {r: 0.35, g: 0.7, b: 1, a: 0.9}

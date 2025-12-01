@@ -1253,7 +1253,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grid: {fileID: 1504228596}
   mover: {fileID: 1250605533}
-  defaultMachine: {fileID: 11400000, guid: ec8e2f5c40264434bb30245b996def7d, type: 2}
+  defaultMachine: {fileID: 11400000, guid: 779258819dd6f304c88566816c1f7553, type: 2}
   previewHeight: 0.5
   previewAlpha: 0.6
 --- !u!95 &1250605536
