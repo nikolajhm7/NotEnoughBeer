@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0da5dcb2d47f9a047ac90bfa689206e6, type: 3}
-  m_Name: Barley
+  m_Name: GarageUpgrade
   m_EditorClassIdentifier: 
-  id: Barley
+  id: garage_upgrade
   prefab: {fileID: 0}
-  cost: 20
+  cost: 400
   occupiedOffsets:
   - {x: 0, y: 0}
   affectedOffsets:
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
+  - {x: 0, y: 1}
+  - {x: 0, y: 2}
+  - {x: 0, y: 3}
   occupiedOk: {r: 0.35, g: 0.9, b: 0.35, a: 1}
   occupiedBad: {r: 0.9, g: 0.35, b: 0.35, a: 1}
   affectedTint: {r: 0.35, g: 0.7, b: 1, a: 0.9}

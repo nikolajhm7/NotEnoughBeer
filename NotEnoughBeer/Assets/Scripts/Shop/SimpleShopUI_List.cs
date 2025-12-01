@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,16 +19,18 @@ public class SimpleShopUI_List : MonoBehaviour
     [SerializeField] TMP_Text unitPriceText;
     [SerializeField] Button sellAllButton;
     [SerializeField] Button addBeerDebugButton;
-    [SerializeField] int sellPricePerUnit = 10;
 
     [Header("HUD")]
     [SerializeField] TMP_Text moneyText;
     [SerializeField] TMP_Text toastText;
 
     [Header("Garage Upgrade")]
-    [SerializeField] GridManager grid;
-    [SerializeField] Button upgradeGarageButton;
-    [SerializeField] int garageUpgradeCost = 200;
+    [SerializeField] GridManager grid;                   // assign TileManager here in Inspector
+
+    [Header("Garage Upgrade")]
+    
+    [SerializeField] SaveManager saveManager;   
+
 
     public bool IsOpen => rootPanel && rootPanel.activeSelf;
 
@@ -39,7 +41,6 @@ public class SimpleShopUI_List : MonoBehaviour
         Hide();
         BuildList();
         HookSell();
-        HookGarageUpgrade();
         RefreshAll();
     }
 
@@ -56,10 +57,9 @@ public class SimpleShopUI_List : MonoBehaviour
         if (rootPanel) rootPanel.SetActive(false);
     }
 
-    // ---------- BUY LIST (machines + ingredients) ----------
+    // ---------- BUY LIST (machines + ingredients + garage) ----------
     void BuildList()
     {
-        // clear old rows
         foreach (var go in _spawnedRows) Destroy(go);
         _spawnedRows.Clear();
 
@@ -74,9 +74,18 @@ public class SimpleShopUI_List : MonoBehaviour
             var btn = row.transform.Find("BuyButton")?.GetComponent<Button>();
 
             var label = string.IsNullOrEmpty(def.id) ? def.name : def.id;
-
             if (name) name.text = label;
-            if (price) price.text = $"$ {def.cost}";
+
+            int displayCost = def.cost;
+
+            // special case: garage upgrade uses dynamic cost
+            if (!string.IsNullOrEmpty(def.id) && def.id.ToLower() == "garage_upgrade")
+            {
+                displayCost = GetGarageUpgradeCost();
+            }
+
+            if (price) price.text = $"$ {displayCost}";
+
             if (btn)
             {
                 btn.onClick.RemoveAllListeners();
@@ -88,6 +97,7 @@ public class SimpleShopUI_List : MonoBehaviour
     void OnClickCatalogEntry(MachineDefinition def)
     {
         if (def == null) return;
+
         if (Currency.Instance == null)
         {
             Toast("No Currency in scene.");
@@ -101,14 +111,22 @@ public class SimpleShopUI_List : MonoBehaviour
             case "barley":
                 BuyBarley(def);
                 break;
+
             case "yeast":
                 BuyYeast(def);
                 break;
+
             case "bottles":
                 BuyBottles(def);
                 break;
+
+            case "garage_upgrade":
+                UpgradeGarageFromDef(def);
+                break;
+
             default:
-                Equip(def); // normal machine
+                // normal machine → place with MachinePlacer
+                Equip(def);
                 break;
         }
     }
@@ -238,32 +256,62 @@ public class SimpleShopUI_List : MonoBehaviour
         }
     }
 
-
-    // ---------- GARAGE UPGRADE ----------
-    void HookGarageUpgrade()
+    // ---------- GARAGE UPGRADE HELPERS ----------
+    int GetGarageUpgradeLevel()
     {
-        if (!upgradeGarageButton || !grid) return;
+        if (!grid) return 0;
 
-        upgradeGarageButton.onClick.RemoveAllListeners();
-        upgradeGarageButton.onClick.AddListener(() =>
-        {
-            if (Currency.Instance == null)
-            {
-                Toast("No Currency in scene.");
-                return;
-            }
+        // base garage is 5x5
+        int baseWidth = 5;
+        int extra = Mathf.Max(0, grid.width - baseWidth);
 
-            if (!Currency.Instance.SpendCurrency(garageUpgradeCost))
-            {
-                Toast("Not enough money to upgrade garage.");
-                return;
-            }
-
-            grid.Expand(addRight: 1, addLeft: 1, addUp: 1, addDown: 1);
-            Toast("Garage upgraded!");
-            RefreshAll();
-        });
+        // Expand(1,1,1,1) increases width by 2 each time: 5,7,9,11...
+        int level = extra / 2;
+        return level;
     }
+
+    // 1st: 400, 2nd: 500, 3rd: 700, 4th: 900, then +200 each level
+    int GetGarageUpgradeCost()
+    {
+        int level = GetGarageUpgradeLevel();
+        int[] baseCosts = { 400, 500, 700, 900 };
+
+        if (level < baseCosts.Length)
+            return baseCosts[level];
+
+        int extraLevels = level - (baseCosts.Length - 1);
+        return baseCosts[baseCosts.Length - 1] + 200 * extraLevels;
+    }
+
+    void UpgradeGarageFromDef(MachineDefinition def)
+    {
+        if (!grid)
+        {
+            Toast("No GridManager assigned.");
+            return;
+        }
+
+        int cost = GetGarageUpgradeCost();
+
+        if (!Currency.Instance.SpendCurrency(cost))
+        {
+            Toast($"Not enough money to upgrade garage. Need ${cost}.");
+            return;
+        }
+
+        // expand 1 tile in every direction
+        grid.Expand(addRight: 1, addLeft: 1, addUp: 1, addDown: 1);
+
+        // 🔁 Rebuild grid + machines + interactables properly
+        
+
+        Toast($"Garage upgraded! New size: {grid.width} x {grid.height} (cost ${cost}).");
+
+        // rebuild UI list for new upgrade cost
+        BuildList();
+        RefreshAll();
+    }
+
 
     // ---------- UI refresh ----------
     void RefreshAll()
@@ -290,7 +338,6 @@ public class SimpleShopUI_List : MonoBehaviour
             beerCountText.text = $"{count} units";
         }
     }
-
 
     void Toast(string msg)
     {

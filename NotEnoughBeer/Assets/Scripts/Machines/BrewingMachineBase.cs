@@ -30,7 +30,6 @@ public abstract class BrewingMachineBase : MonoBehaviour, IInteractable
 
     public void Interact(PlayerInteractor ctx)
     {
-        // Block doing anything, but still allow UI text
         if (!HasIngredients())
         {
             Debug.Log($"[{name}] Missing ingredients.");
@@ -43,25 +42,26 @@ public abstract class BrewingMachineBase : MonoBehaviour, IInteractable
             return;
         }
 
-        // Malting starts a new batch
-        if (RequiredStage == Batch.Stage.Malting &&
-            !BrewingBatchManager.Instance.HasActiveBatch)
+        var manager = BrewingBatchManager.Instance;
+        if (manager == null)
         {
-            BrewingBatchManager.Instance.StartNewBatch();
+            Debug.LogWarning($"[{name}] No BrewingBatchManager in scene.");
+            return;
+        }
+
+        if (RequiredStage == Batch.Stage.Malting && !manager.HasActiveBatch)
+        {
+            manager.StartNewBatch();
         }
 
         ConsumeIngredients();
 
         if (!string.IsNullOrEmpty(minigameSceneName) && MinigameBridge.Instance != null)
         {
-            MinigameBridge.Instance.StartMinigame(
-                minigameSceneName,
-                OnMinigameComplete
-            );
+            MinigameBridge.Instance.StartMinigame(minigameSceneName, OnMinigameComplete);
         }
         else
         {
-            // No minigame yet – auto-complete
             Debug.Log($"[{name}] No minigame set, auto-completing with score {autoScoreIfNoMinigame}");
             OnMinigameComplete(autoScoreIfNoMinigame);
         }
@@ -69,22 +69,38 @@ public abstract class BrewingMachineBase : MonoBehaviour, IInteractable
 
     void OnMinigameComplete(float score)
     {
-        BrewingBatchManager.Instance.AddScore(score);
-        BrewingBatchManager.Instance.AdvanceStage();
+        var manager = BrewingBatchManager.Instance;
+        if (manager == null)
+        {
+            Debug.LogWarning($"[{name}] No BrewingBatchManager when finishing stage.");
+            return;
+        }
+
+        manager.AddScore(score);
+        manager.AdvanceStage();
         OnStageFinished();
     }
 
     bool IsCorrectStage()
     {
+        var manager = BrewingBatchManager.Instance;
+
+        // If manager missing, don't allow running later stages
+        if (manager == null)
+            return RequiredStage == Batch.Stage.Malting; // malting is "start batch"
+
         // Malting can always start a batch (if ingredients exist)
         if (RequiredStage == Batch.Stage.Malting)
             return true;
 
-        var batch = BrewingBatchManager.Instance?.CurrentBatch;
+        var batch = manager.CurrentBatch;
         if (batch == null || batch.IsFinished) return false;
 
         return batch.CurrentStage == RequiredStage;
     }
+
+  
+
 
     protected abstract Batch.Stage RequiredStage { get; }
     protected abstract bool HasIngredients();

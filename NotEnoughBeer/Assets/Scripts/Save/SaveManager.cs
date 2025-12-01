@@ -45,6 +45,13 @@ public class SaveManager : MonoBehaviour
         }
     }
 
+    public void SaveAndReload()
+    {
+        Save();
+        Load();
+    }
+
+
     string SavePath => GetSlotPath(CurrentSlot);
     public static string GetSlotPath(int slot) =>
         Path.Combine(Application.persistentDataPath, $"save_slot{Mathf.Clamp(slot, 1, 3)}.json");

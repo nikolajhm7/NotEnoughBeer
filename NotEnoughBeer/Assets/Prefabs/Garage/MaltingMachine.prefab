@@ -67,5 +67,32 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 019c64b835137e7468c3748f5c0487b8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -1706891544339350594}
   m_SourcePrefab: {fileID: 100100000, guid: 019c64b835137e7468c3748f5c0487b8, type: 3}
+--- !u!1 &1045860063181058821 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 019c64b835137e7468c3748f5c0487b8, type: 3}
+  m_PrefabInstance: {fileID: 162919028596248148}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-1706891544339350594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1045860063181058821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 705ec360ab7f6544c99c32b231998aa1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactionDescription: Use machine
+  missingIngredientsDescription: You don't have the required ingredients.
+  wrongStageDescription: The batch is not ready for this step.
+  priority: 0
+  minigameSceneName: 
+  autoScoreIfNoMinigame: 20
+  barleyPerBatch: 5

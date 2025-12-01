@@ -6,7 +6,15 @@ public class BrewingBatchManager : MonoBehaviour
 
     public Batch CurrentBatch { get; private set; }
 
-    // ... Awake, StartNewBatch, etc.
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
 
     public void StartNewBatch()
     {
@@ -27,7 +35,7 @@ public class BrewingBatchManager : MonoBehaviour
         CurrentBatch.Advance();
     }
 
-    // NEW: rarity by quality
+    // rarity by quality
     public BeerStorage.BeerRarity GetRarity()
     {
         if (CurrentBatch == null)
@@ -35,7 +43,6 @@ public class BrewingBatchManager : MonoBehaviour
 
         float q = CurrentBatch.QualityValue;
 
-        // tweak thresholds as you like
         if (q >= 90) return BeerStorage.BeerRarity.Legendary;
         if (q >= 70) return BeerStorage.BeerRarity.Mythical;
         if (q >= 50) return BeerStorage.BeerRarity.Rare;
@@ -43,9 +50,8 @@ public class BrewingBatchManager : MonoBehaviour
         return BeerStorage.BeerRarity.Common;
     }
 
-    // optional helper for UI/debug
     public string GetRarityName()
     {
-        return GetRarity().ToString(); // "Common", "Uncommon", etc.
+        return GetRarity().ToString();
     }
 }

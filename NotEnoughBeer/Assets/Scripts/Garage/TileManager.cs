@@ -76,13 +76,9 @@ public class GridManager : MonoBehaviour
         foreach (Transform c in floorParent)
         {
             if (Application.isEditor)
-            {
                 DestroyImmediate(c.gameObject);
-            }
             else
-            {
                 Destroy(c.gameObject);
-            }
         }
 
         var wallsParent = wallsContainer ? wallsContainer : transform;
@@ -90,13 +86,19 @@ public class GridManager : MonoBehaviour
         foreach (Transform c in wallsParent)
         {
             if (Application.isEditor)
-            {
                 DestroyImmediate(c.gameObject);
-            }
             else
-            {
                 Destroy(c.gameObject);
-            }
+        }
+
+        // EXTRA: destroy ANY Wall component anywhere (old grids, wrong parents, etc.)
+        var strayWalls = FindObjectsOfType<Wall>();
+        foreach (var w in strayWalls)
+        {
+            if (Application.isEditor)
+                DestroyImmediate(w.gameObject);
+            else
+                Destroy(w.gameObject);
         }
 
         Tiles.Clear();
@@ -106,6 +108,7 @@ public class GridManager : MonoBehaviour
         interactablesByCell.Clear();
         cellsByInteractable.Clear();
     }
+
 
     void BuildPerimeterWalls()
     {
@@ -185,9 +188,13 @@ public class GridManager : MonoBehaviour
 
         width = newWidth;
         height = newHeight;
-        Generate();
+
+        Generate();                 // Clear + rebuild floor + walls
+        ReregisterAllInteractables(); // Re-hook computer & machines
     }
-    
+
+
+
     public bool IsOccupied(Vector2Int g) => occupied.Contains(g);
 
     public void SetOccupied(IEnumerable<Vector2Int> cells, bool value)
@@ -218,6 +225,33 @@ public class GridManager : MonoBehaviour
 
         return 0f;
     }
+
+
+    public void ReregisterAllInteractables()
+    {
+        // Reset maps
+        interactablesByCell.Clear();
+        cellsByInteractable.Clear();
+
+        // Find every MonoBehaviour that implements IInteractable
+        var all = FindObjectsOfType<MonoBehaviour>();
+        foreach (var mb in all)
+        {
+            if (mb is not IInteractable interactable)
+                continue;
+
+            Vector3 pos = mb.transform.position;
+            Vector2Int cell = WorldToGrid(pos);
+
+            if (IsInside(cell))
+            {
+                RegisterInteractableCells(new[] { cell }, interactable);
+            }
+        }
+    }
+
+
+
 
     public float GetObjectExtentsY(GameObject go)
     {

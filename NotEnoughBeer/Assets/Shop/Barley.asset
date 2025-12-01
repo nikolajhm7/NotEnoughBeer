@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e20179f7dff3e646b6c4092ffbf329f, type: 3}
   m_Name: Barley
   m_EditorClassIdentifier: 
-  displayName: Beermaker9000
+  displayName: Barley
   icon: {fileID: 0}
-  price: 500
+  price: 10
   prefab: {fileID: 0}
