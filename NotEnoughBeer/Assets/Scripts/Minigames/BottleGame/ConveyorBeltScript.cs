@@ -8,7 +8,6 @@ public class ConveyorBeltScript : MonoBehaviour
     [SerializeField] private float spawnRate = 1f; // Time between spawns in seconds
     
     [Header("Tiling Settings")]
-    [SerializeField] private GameObject conveyorTilePrefab;
     [SerializeField] private float tileWidth = 4f; // Width of 4 tiles
     
     private Camera mainCamera;
@@ -26,7 +25,6 @@ public class ConveyorBeltScript : MonoBehaviour
         spawnX = -screenWidth / 2f - tileWidth / 2f;
         
         // Spawn first tile immediately
-        SpawnTile();
     }
 
     void Update()
@@ -36,7 +34,6 @@ public class ConveyorBeltScript : MonoBehaviour
         // Spawn new tile based on spawn rate
         if (timeSinceLastSpawn >= spawnRate)
         {
-            SpawnTile();
             timeSinceLastSpawn = 0f;
         }
         
@@ -61,12 +58,5 @@ public class ConveyorBeltScript : MonoBehaviour
                 }
             }
         }
-    }
-    
-    void SpawnTile()
-    {
-        GameObject tile = Instantiate(conveyorTilePrefab, transform);
-        tile.transform.position = new Vector3(spawnX, transform.position.y, transform.position.z);
-        conveyorTiles.Add(tile);
     }
 }

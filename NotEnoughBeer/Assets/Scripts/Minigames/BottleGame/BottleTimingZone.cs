@@ -14,7 +14,7 @@ public class BottleTimingZone : MonoBehaviour
     private bool isInZone = false;
     private GameObject currentBottle = null;
     private bool bottleCaught = false;
-    private Key requiredKey;
+    private Key requiredKey = Key.W;
     private Key[] possibleKeys = { Key.W, Key.A, Key.S, Key.D };
     
     private int score = 0;
