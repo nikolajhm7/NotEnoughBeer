@@ -9,26 +9,69 @@ public class PackagingMachineInteractable : BrewingMachineBase
 
     protected override bool HasIngredients()
     {
-        if (IngredientStorage.Instance == null) return true;
-        return IngredientStorage.Instance.Bottles >= bottlesPerBatch;
+        return PocketInventory.Instance != null &&
+               PocketInventory.Instance.Inv.Get(ItemId.Bottles) >= bottlesPerBatch;
     }
 
     protected override void ConsumeIngredients()
     {
-        IngredientStorage.Instance?.UseBottles(bottlesPerBatch);
+        PocketInventory.Instance.Inv.TryRemove(ItemId.Bottles, bottlesPerBatch);
     }
 
     protected override void OnStageFinished()
     {
-        if (BeerStorage.Instance == null)
+        var bm = BrewingBatchManager.Instance;
+        if (bm == null)
         {
-            Debug.LogWarning("[Packaging] BeerStorage.Instance is null.");
+            Debug.LogWarning("[Packaging] BrewingBatchManager.Instance is null.");
             return;
         }
 
-        var rarity = BrewingBatchManager.Instance.GetRarity();
-        BeerStorage.Instance.AddBeer(bottlesPerBatch, rarity);
+        var rarity = bm.GetRarity();
+        var beerId = BeerItemForRarity(rarity);
 
-        Debug.Log($"[Packaging] Finished batch ({rarity}) and added {bottlesPerBatch} bottles.");
+        // pocket first
+        if (PocketInventory.Instance != null && PocketInventory.Instance.Inv.TryAdd(beerId, bottlesPerBatch))
+        {
+            Debug.Log($"[Packaging] Added {bottlesPerBatch} {rarity} beer to pocket.");
+            return;
+        }
+
+        // then containers
+        var container = FindFirstContainerWithSpace(bottlesPerBatch);
+        if (container != null && container.Inv.TryAdd(beerId, bottlesPerBatch))
+        {
+            Debug.Log($"[Packaging] Pocket full. Added {bottlesPerBatch} {rarity} beer to container.");
+            return;
+        }
+
+        NotificationService.Instance?.Show("No space for beer! Pocket + containers are full.");
+        Debug.LogWarning("[Packaging] No space in pocket or containers.");
+    }
+
+    static StorageContainer FindFirstContainerWithSpace(int amount)
+    {
+        if (StorageRegistry.Instance == null) return null;
+
+        foreach (var c in StorageRegistry.Instance.Containers)
+        {
+            if (!c) continue;
+            if (c.Inv != null && c.Inv.CanAdd(amount))
+                return c;
+        }
+        return null;
+    }
+
+    static ItemId BeerItemForRarity(BeerStorage.BeerRarity r)
+    {
+        switch (r)
+        {
+            case BeerStorage.BeerRarity.Common: return ItemId.Beer_Common;
+            case BeerStorage.BeerRarity.Uncommon: return ItemId.Beer_Uncommon;
+            case BeerStorage.BeerRarity.Rare: return ItemId.Beer_Rare;
+            case BeerStorage.BeerRarity.Mythical: return ItemId.Beer_Mythical;
+            case BeerStorage.BeerRarity.Legendary: return ItemId.Beer_Legendary;
+            default: return ItemId.Beer_Common;
+        }
     }
 }

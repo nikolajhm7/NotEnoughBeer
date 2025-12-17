@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class SaveData
 {
     // metadata
-    public string Version = "0.1.0";
+    public string Version = "0.2.0";
     public string SavedAtIsoUtc;
 
     // grid info
@@ -20,8 +20,15 @@ public class SaveData
     // currency
     public int CurrencyAmount;
 
-    // machines
+    // machines (existing)
     public List<MachineRecord> Machines = new();
+
+    // NEW: pocket inventory
+    public int PocketCapacity = 0;
+    public List<ItemStack> PocketItems = new();
+
+    // NEW: container inventories
+    public List<ContainerSave> Containers = new();
 }
 
 [Serializable]
@@ -31,4 +38,24 @@ public class MachineRecord
     public int AnchorX, AnchorY;
     public int FacingIndex;
     public float YOffset;
+}
+
+/// <summary>
+/// Simple stack record for saving inventory.
+/// Must match your Inventory.cs ItemStack (same fields).
+/// </summary>
+[Serializable]
+
+
+
+public class ContainerSave
+{
+    // identify which placed machine this is
+    public string DefinitionId;
+    public int AnchorX, AnchorY;
+    public int FacingIndex;
+
+    // container settings/data
+    public int Capacity;
+    public List<ItemStack> Items = new();
 }

@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine.InputSystem;
 using System;
 using System.Linq;
 
@@ -51,7 +50,6 @@ public class SaveManager : MonoBehaviour
         Load();
     }
 
-
     string SavePath => GetSlotPath(CurrentSlot);
     public static string GetSlotPath(int slot) =>
         Path.Combine(Application.persistentDataPath, $"save_slot{Mathf.Clamp(slot, 1, 3)}.json");
@@ -60,7 +58,8 @@ public class SaveManager : MonoBehaviour
     {
         var data = new SaveData
         {
-            SavedAtIsoUtc = DateTime.UtcNow.ToString("g"),
+            // Use roundtrip-ish format so parsing is stable
+            SavedAtIsoUtc = DateTime.UtcNow.ToString("o"),
 
             GridWidth = Grid.width,
             GridHeight = Grid.height,
@@ -70,29 +69,54 @@ public class SaveManager : MonoBehaviour
             PlayerY = Player.CurrentCell.y,
             PlayerFacingIndex = Player.FacingIndex,
 
-            CurrencyAmount = Currency ? Currency.CurrencyAmount : 0
+            CurrencyAmount = Currency ? Currency.CurrencyAmount : 0,
+
+            // NEW: pocket inventory
+            PocketCapacity = PocketInventory.Instance ? PocketInventory.Instance.capacity : 0,
+            PocketItems = PocketInventory.Instance ? PocketInventory.Instance.Inv.ToStacks() : new List<ItemStack>(),
+
+            // NEW: containers (filled below)
+            Containers = new List<ContainerSave>()
         };
 
         var machineInstances = FindObjectsByType<MachineInstance>(FindObjectsSortMode.None);
 
         foreach (var machineInstance in machineInstances)
         {
-            data.Machines.Add(new()
+            string defId = machineInstance.def ? machineInstance.def.id : "";
+
+            data.Machines.Add(new MachineRecord
             {
-                DefinitionId = machineInstance.def ? machineInstance.def.id : "",
+                DefinitionId = defId,
                 AnchorX = machineInstance.anchorCell.x,
                 AnchorY = machineInstance.anchorCell.y,
                 FacingIndex = machineInstance.facingIndex,
                 YOffset = machineInstance.YOffset,
             });
+
+            // NEW: if this machine contains a StorageContainer, save its inventory
+            var container = machineInstance.GetComponentInChildren<StorageContainer>();
+            if (container != null && container.Inv != null)
+            {
+                data.Containers.Add(new ContainerSave
+                {
+                    DefinitionId = defId,
+                    AnchorX = machineInstance.anchorCell.x,
+                    AnchorY = machineInstance.anchorCell.y,
+                    FacingIndex = machineInstance.facingIndex,
+
+                    Capacity = container.capacity,
+                    Items = container.Inv.ToStacks()
+                });
+            }
         }
 
         var json = JsonUtility.ToJson(data, prettyPrint: true);
-        
+
         Directory.CreateDirectory(Path.GetDirectoryName(SavePath));
         File.WriteAllText(SavePath, json);
 
-        Debug.Log($"[Save] Slot {CurrentSlot}: {data.Machines.Count} machines to {SavePath}");
+        Debug.Log($"[Save] Slot {CurrentSlot}: {data.Machines.Count} machines, {data.Containers.Count} containers -> {SavePath}");
     }
 
     public void Load()
@@ -160,6 +184,24 @@ public class SaveManager : MonoBehaviour
             {
                 Grid.RegisterInteractableCells(interactCells, ia);
             }
+
+            // NEW: restore container contents if this machine has StorageContainer
+            var container = go.GetComponentInChildren<StorageContainer>();
+            if (container != null && container.Inv != null)
+            {
+                var saved = FindContainerSave(data, rec.DefinitionId, anchor, rec.FacingIndex);
+                if (saved != null)
+                {
+                    if (saved.Capacity > 0)
+                        container.SetCapacity(saved.Capacity);
+
+
+                    // If your StorageContainer builds Inventory in Awake() using capacity,
+                    // you may want a method that rebuilds inventory when capacity changes.
+                    // For now: keep current Inventory instance and just load stacks.
+                    container.Inv.LoadFromStacks(saved.Items);
+                }
+            }
         }
 
         Debug.Log($"Loaded {data.Machines.Count} machines from {SavePath}");
@@ -174,13 +216,40 @@ public class SaveManager : MonoBehaviour
         if (Player)
         {
             var c = new Vector2Int(
-                    Mathf.Clamp(data.PlayerX, 0, Grid.width - 1),
-                    Mathf.Clamp(data.PlayerY, 0, Grid.height - 1)
-                );
+                Mathf.Clamp(data.PlayerX, 0, Grid.width - 1),
+                Mathf.Clamp(data.PlayerY, 0, Grid.height - 1)
+            );
 
             Player.TeleportToCell(c);
             Player.SetFacingIndex(data.PlayerFacingIndex);
         }
+
+        // NEW: restore pocket inventory
+        if (PocketInventory.Instance != null)
+        {
+            if (data.PocketCapacity > 0)
+                PocketInventory.Instance.SetCapacity(data.PocketCapacity);
+
+            PocketInventory.Instance.Inv.LoadFromStacks(data.PocketItems);
+        }
+    }
+
+    ContainerSave FindContainerSave(SaveData data, string defId, Vector2Int anchor, int facingIndex)
+    {
+        if (data == null || data.Containers == null) return null;
+
+        for (int i = 0; i < data.Containers.Count; i++)
+        {
+            var c = data.Containers[i];
+            if (c == null) continue;
+
+            if (c.DefinitionId == defId &&
+                c.AnchorX == anchor.x && c.AnchorY == anchor.y &&
+                c.FacingIndex == facingIndex)
+                return c;
+        }
+
+        return null;
     }
 
     void ClearAllMachinesAndOccupancy()
@@ -191,12 +260,13 @@ public class SaveManager : MonoBehaviour
         {
             Grid.SetOccupied(mi.occupiedCells, false);
 
-            var inteactables = mi.GetComponentsInChildren<IInteractable>();
-            foreach (var ia in inteactables)
+            var interactables = mi.GetComponentsInChildren<IInteractable>();
+            foreach (var ia in interactables)
             {
                 Grid.UnregisterInteractable(ia);
             }
         }
+
         // then destroy gameobjects
         foreach (var mi in instances)
         {
@@ -266,6 +336,13 @@ public class SaveManager : MonoBehaviour
             if (Currency) Currency.SetCurrency(StartingCurrency);
 
             Player.SetFacingIndex(FacingIndexToward(Player.startCell, anchor));
+        }
+
+        // NEW: initialize pocket (optional)
+        if (PocketInventory.Instance != null)
+        {
+            // leave whatever is set in inspector, but ensure Inventory exists/capacity correct
+            PocketInventory.Instance.SetCapacity(PocketInventory.Instance.capacity);
         }
     }
 
