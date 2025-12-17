@@ -222,6 +222,8 @@ public class MachinePlacer : MonoBehaviour
         {
             grid.RegisterInteractableCells(interactCells, interactable);
         }
+
+        SFXManager.Instance.Play(SFX.PlaceMachine);
     }
 
     #endregion Placement

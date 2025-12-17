@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b9f0e8e5fe0e874f99ba5240f29ce66, type: 3}
+  m_Name: Sound Effects
+  m_EditorClassIdentifier: 
+  entries:
+  - sfx: 1
+    clip: {fileID: 8300000, guid: e36ddffad47cee345b89fd6d1974f39e, type: 3}
+    volume: 0.5
+    pitchRange: {x: 0, y: 0}
+  - sfx: 2
+    clip: {fileID: 8300000, guid: f1148bde541683e40876310c8c984c68, type: 3}
+    volume: 0.5
+    pitchRange: {x: 0, y: 0}
+  - sfx: 3
+    clip: {fileID: 8300000, guid: 1ee6d0d3b4eb55f479d7de07a4e008d7, type: 3}
+    volume: 0.5
+    pitchRange: {x: 0, y: 0}
+  - sfx: 4
+    clip: {fileID: 8300000, guid: ae99a30e9e59f8449a5bc07ef747ee8c, type: 3}
+    volume: 0.5
+    pitchRange: {x: 0, y: 0}
+  - sfx: 5
+    clip: {fileID: 8300000, guid: abdfc4a2cfa0e224c93eef49196da1bc, type: 3}
+    volume: 0.5
+    pitchRange: {x: 0, y: 0}

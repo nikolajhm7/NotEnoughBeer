@@ -129,6 +129,8 @@ public class SimpleShopUI_List : MonoBehaviour
                 Equip(def);
                 break;
         }
+
+        SFXManager.Instance.Play(SFX.Purchase);
     }
 
     void BuyBarley(MachineDefinition def)

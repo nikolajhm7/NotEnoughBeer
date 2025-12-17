@@ -575,6 +575,7 @@ GameObject:
   m_Component:
   - component: {fileID: 298169154}
   - component: {fileID: 298169153}
+  - component: {fileID: 298169155}
   m_Layer: 0
   m_Name: UIManager
   m_TagString: Untagged
@@ -595,7 +596,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   popupPanel: {fileID: 549080062}
-  showTime: 5
+  showTime: 1
 --- !u!4 &298169154
 Transform:
   m_ObjectHideFlags: 0
@@ -611,6 +612,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &298169155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 298169152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 377193d1393e39a4fa955bc3eddfe10f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  notificationPrefab: {fileID: 3877688414302006442, guid: 702d8f2c1d020364fa5fac3ed06b950b, type: 3}
+  uiCanvas: {fileID: 625657635}
 --- !u!4 &303445302 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ef0abd7a210da4f4580b06612912001e, type: 3}
@@ -1956,7 +1971,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1683794476}
   m_HandleRect: {fileID: 1683794475}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 0.000004359692
   m_Size: 0.9894184
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -4795,7 +4810,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9761d2a1fa648634eb409ec52acb0d2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSceneName: Main*
 --- !u!1 &1991909164
 GameObject:
   m_ObjectHideFlags: 0

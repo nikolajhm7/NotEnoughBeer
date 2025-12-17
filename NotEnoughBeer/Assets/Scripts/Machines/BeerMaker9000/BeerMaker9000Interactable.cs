@@ -22,7 +22,7 @@ public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
     {
         if (IngredientStorage.Instance == null || BeerStorage.Instance == null)
         {
-            Debug.LogWarning("[BeerMaker9000] Missing IngredientStorage or BeerStorage.");
+            NotificationService.Instance.Show("Missing IngredientStorage or BeerStorage.");
             return;
         }
 
@@ -33,6 +33,7 @@ public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
             ing.Bottles < bottlesPerBatch)
         {
             Debug.Log("[BeerMaker9000] Not enough ingredients (needs barley, yeast and bottles).");
+            NotificationService.Instance.Show("Not enough ingredients to brew beer.");
             return;
         }
 
@@ -49,6 +50,9 @@ public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
         BeerStorage.Instance.AddBeer(bottlesPerBatch, rarity);
 
         Debug.Log($"[BeerMaker9000] Brewed {bottlesPerBatch} bottles of {rarity} beer (quality {quality:F1}).");
+        NotificationService.Instance.Show($"+{bottlesPerBatch} {rarity} beer (quality {quality:F1})", MapRarityToColor(rarity));
+
+        SFXManager.Instance.Play(SFX.Pop);
     }
 
     BeerStorage.BeerRarity QualityToRarity(float q)
@@ -59,5 +63,24 @@ public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
         if (q >= 50) return BeerStorage.BeerRarity.Rare;
         if (q >= 30) return BeerStorage.BeerRarity.Uncommon;
         return BeerStorage.BeerRarity.Common;
+    }
+
+    Color MapRarityToColor(BeerStorage.BeerRarity rarity)
+    {
+        switch (rarity)
+        {
+            case BeerStorage.BeerRarity.Common:
+                return Color.gray;
+            case BeerStorage.BeerRarity.Uncommon:
+                return Color.green;
+            case BeerStorage.BeerRarity.Rare:
+                return Color.blue;
+            case BeerStorage.BeerRarity.Mythical:
+                return Color.magenta;
+            case BeerStorage.BeerRarity.Legendary:
+                return Color.orange;
+            default:
+                return Color.white;
+        }
     }
 }
