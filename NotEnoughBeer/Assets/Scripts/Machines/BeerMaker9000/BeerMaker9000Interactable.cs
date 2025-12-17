@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
 {
@@ -10,9 +10,9 @@ public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
     public int yeastPerBatch = 1;
     public int bottlesPerBatch = 12;
 
-    [Header("Quality range (0�100)")]
+    [Header("Quality range (0–100)")]
     public float minQuality = 5f;
-    public float maxQuality = 60f; // < 70 => no Mythical/Legendary
+    public float maxQuality = 60f;
 
     public int Priority => priority;
     public string GetInteractionDescription(PlayerInteractor context) => InteractionDescription;
@@ -20,44 +20,73 @@ public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
 
     public void Interact(PlayerInteractor context)
     {
-        if (IngredientStorage.Instance == null || BeerStorage.Instance == null)
+        if (PocketInventory.Instance == null)
         {
-            NotificationService.Instance.Show("Missing IngredientStorage or BeerStorage.");
+            NotificationService.Instance?.Show("Missing PocketInventory.");
             return;
         }
 
-        var ing = IngredientStorage.Instance;
+        var inv = PocketInventory.Instance.Inv;
 
-        if (ing.Barley < barleyPerBatch ||
-            ing.Yeast < yeastPerBatch ||
-            ing.Bottles < bottlesPerBatch)
+        if (inv.Get(ItemId.Barley) < barleyPerBatch ||
+            inv.Get(ItemId.Yeast) < yeastPerBatch ||
+            inv.Get(ItemId.Bottles) < bottlesPerBatch)
         {
-            Debug.Log("[BeerMaker9000] Not enough ingredients (needs barley, yeast and bottles).");
-            NotificationService.Instance.Show("Not enough ingredients to brew beer.");
+            NotificationService.Instance?.Show("Not enough ingredients to brew beer.");
             return;
         }
 
-        // Consume ingredients
-        ing.UseBarley(barleyPerBatch);
-        ing.UseYeast(yeastPerBatch);
-        ing.UseBottles(bottlesPerBatch);
+        // consume
+        inv.TryRemove(ItemId.Barley, barleyPerBatch);
+        inv.TryRemove(ItemId.Yeast, yeastPerBatch);
+        inv.TryRemove(ItemId.Bottles, bottlesPerBatch);
 
-        // Roll a worse quality than the real pipeline can get
         float quality = Random.Range(minQuality, maxQuality);
-
         var rarity = QualityToRarity(quality);
+        var beerId = BeerItemForRarity(rarity);
 
-        BeerStorage.Instance.AddBeer(bottlesPerBatch, rarity);
+        // pocket first
+        if (inv.TryAdd(beerId, bottlesPerBatch))
+        {
+            NotificationService.Instance?.Show($"+{bottlesPerBatch} {rarity} beer (quality {quality:F1})", MapRarityToColor(rarity));
+        }
+        else
+        {
+            // container fallback
+            var container = FindFirstContainerWithSpace(bottlesPerBatch);
+            if (container != null && container.Inv.TryAdd(beerId, bottlesPerBatch))
+            {
+                NotificationService.Instance?.Show($"+{bottlesPerBatch} {rarity} beer → container", MapRarityToColor(rarity));
+            }
+            else
+            {
+                NotificationService.Instance?.Show("No space for beer! Pocket + containers are full.");
+                // rollback (optional): give ingredients back
+                inv.TryAdd(ItemId.Barley, barleyPerBatch);
+                inv.TryAdd(ItemId.Yeast, yeastPerBatch);
+                inv.TryAdd(ItemId.Bottles, bottlesPerBatch);
+                return;
+            }
+        }
 
-        Debug.Log($"[BeerMaker9000] Brewed {bottlesPerBatch} bottles of {rarity} beer (quality {quality:F1}).");
-        NotificationService.Instance.Show($"+{bottlesPerBatch} {rarity} beer (quality {quality:F1})", MapRarityToColor(rarity));
+        if (SFXManager.Instance != null) SFXManager.Instance.Play(SFX.Pop);
+    }
 
-        SFXManager.Instance.Play(SFX.Pop);
+    static StorageContainer FindFirstContainerWithSpace(int amount)
+    {
+        if (StorageRegistry.Instance == null) return null;
+
+        foreach (var c in StorageRegistry.Instance.Containers)
+        {
+            if (!c) continue;
+            if (c.Inv != null && c.Inv.CanAdd(amount))
+                return c;
+        }
+        return null;
     }
 
     BeerStorage.BeerRarity QualityToRarity(float q)
     {
-        // Same thresholds as BrewingBatchManager, but BeerMaker9000 can't even reach the top end
         if (q >= 90) return BeerStorage.BeerRarity.Legendary;
         if (q >= 70) return BeerStorage.BeerRarity.Mythical;
         if (q >= 50) return BeerStorage.BeerRarity.Rare;
@@ -65,22 +94,29 @@ public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
         return BeerStorage.BeerRarity.Common;
     }
 
+    static ItemId BeerItemForRarity(BeerStorage.BeerRarity r)
+    {
+        switch (r)
+        {
+            case BeerStorage.BeerRarity.Common: return ItemId.Beer_Common;
+            case BeerStorage.BeerRarity.Uncommon: return ItemId.Beer_Uncommon;
+            case BeerStorage.BeerRarity.Rare: return ItemId.Beer_Rare;
+            case BeerStorage.BeerRarity.Mythical: return ItemId.Beer_Mythical;
+            case BeerStorage.BeerRarity.Legendary: return ItemId.Beer_Legendary;
+            default: return ItemId.Beer_Common;
+        }
+    }
+
     Color MapRarityToColor(BeerStorage.BeerRarity rarity)
     {
         switch (rarity)
         {
-            case BeerStorage.BeerRarity.Common:
-                return Color.gray;
-            case BeerStorage.BeerRarity.Uncommon:
-                return Color.green;
-            case BeerStorage.BeerRarity.Rare:
-                return Color.blue;
-            case BeerStorage.BeerRarity.Mythical:
-                return Color.magenta;
-            case BeerStorage.BeerRarity.Legendary:
-                return Color.orange;
-            default:
-                return Color.white;
+            case BeerStorage.BeerRarity.Common: return Color.gray;
+            case BeerStorage.BeerRarity.Uncommon: return Color.green;
+            case BeerStorage.BeerRarity.Rare: return Color.blue;
+            case BeerStorage.BeerRarity.Mythical: return Color.magenta;
+            case BeerStorage.BeerRarity.Legendary: return new Color(1f, 0.5f, 0f);
+            default: return Color.white;
         }
     }
 }

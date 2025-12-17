@@ -9,12 +9,12 @@ public class MaltingMachineInteractable : BrewingMachineBase
 
     protected override bool HasIngredients()
     {
-        return IngredientStorage.Instance != null &&
-               IngredientStorage.Instance.Barley >= barleyPerBatch;
+        return PocketInventory.Instance != null &&
+               PocketInventory.Instance.Inv.Get(ItemId.Barley) >= barleyPerBatch;
     }
 
     protected override void ConsumeIngredients()
     {
-        IngredientStorage.Instance?.UseBarley(barleyPerBatch);
+        PocketInventory.Instance.Inv.TryRemove(ItemId.Barley, barleyPerBatch);
     }
 }

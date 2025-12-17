@@ -9,14 +9,12 @@ public class FermentationMachineInteractable : BrewingMachineBase
 
     protected override bool HasIngredients()
     {
-        // Until you properly buy yeast, you can temporarily just return true.
-        if (IngredientStorage.Instance == null) return true;
-
-        return IngredientStorage.Instance.Yeast >= yeastPerBatch;
+        return PocketInventory.Instance != null &&
+               PocketInventory.Instance.Inv.Get(ItemId.Yeast) >= yeastPerBatch;
     }
 
     protected override void ConsumeIngredients()
     {
-        IngredientStorage.Instance?.UseYeast(yeastPerBatch);
+        PocketInventory.Instance.Inv.TryRemove(ItemId.Yeast, yeastPerBatch);
     }
 }
