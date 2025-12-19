@@ -8,6 +8,9 @@ public class MashingGameManager : MonoBehaviour
     [Tooltip("Panel shown before the game starts")]
     public GameObject startPanel;
     
+    [Tooltip("Panel showing how to play instructions")]
+    public GameObject howToPlayPanel;
+    
     [Tooltip("Panel shown during countdown")]
     public GameObject countdownPanel;
     
@@ -111,6 +114,24 @@ public class MashingGameManager : MonoBehaviour
     }
     
     /// <summary>
+    /// Called when How to Play button is clicked
+    /// </summary>
+    public void OnHowToPlayButtonClicked()
+    {
+        if (startPanel != null) startPanel.SetActive(false);
+        if (howToPlayPanel != null) howToPlayPanel.SetActive(true);
+    }
+    
+    /// <summary>
+    /// Called when Back button is clicked on how to play screen
+    /// </summary>
+    public void OnBackButtonClicked()
+    {
+        if (howToPlayPanel != null) howToPlayPanel.SetActive(false);
+        if (startPanel != null) startPanel.SetActive(true);
+    }
+    
+    /// <summary>
     /// Called when Continue button is clicked on end screen
     /// </summary>
     public void OnContinueButtonClicked()
@@ -127,6 +148,7 @@ public class MashingGameManager : MonoBehaviour
         currentState = GameState.Start;
         
         if (startPanel != null) startPanel.SetActive(true);
+        if (howToPlayPanel != null) howToPlayPanel.SetActive(false);
         if (countdownPanel != null) countdownPanel.SetActive(false);
         if (gamePanel != null) gamePanel.SetActive(false);
         if (endPanel != null) endPanel.SetActive(false);
@@ -148,11 +170,14 @@ public class MashingGameManager : MonoBehaviour
         // Hide start screen, show countdown
         if (startPanel != null) startPanel.SetActive(false);
         if (countdownPanel != null) countdownPanel.SetActive(true);
-        if (gamePanel != null) gamePanel.SetActive(false);
+        if (gamePanel != null) gamePanel.SetActive(true);
         if (endPanel != null) endPanel.SetActive(false);
         
-        // Keep game objects hidden during countdown
-        SetGameObjectsActive(false);
+        // Show game objects but keep components disabled
+        SetGameObjectsActive(true);
+        if (gameScorer != null) gameScorer.enabled = false;
+        if (logPileCycler != null) logPileCycler.enabled = false;
+        if (thermometer != null) thermometer.enabled = false;
         
         // Countdown from 3 to 1
         for (int i = 3; i >= 1; i--)
