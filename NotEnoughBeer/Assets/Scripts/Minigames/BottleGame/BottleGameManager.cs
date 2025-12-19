@@ -51,6 +51,8 @@ public class BottleGameManager : MonoBehaviour
 
     void Start()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         // Show start screen, hide everything else
         if (startScreen != null) startScreen.SetActive(true);
         if (gameUI != null) gameUI.SetActive(false);

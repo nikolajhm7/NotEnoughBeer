@@ -45,7 +45,7 @@ public class PackagingMachineInteractable : BrewingMachineBase
             return;
         }
 
-        NotificationService.Instance?.Show("No space for beer! Pocket + containers are full.");
+        NotificationService.Enqueue($"Added {bottlesPerBatch} {rarity} beer!");
         Debug.LogWarning("[Packaging] No space in pocket or containers.");
     }
 
