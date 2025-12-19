@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MusicManager : MonoBehaviour
 {
-    private static MusicManager instance;
+    public static MusicManager Instance;
 
     [Header("Audio Sources")]
     public AudioSource SourceA;
@@ -34,9 +34,9 @@ public class MusicManager : MonoBehaviour
 
     private void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);
 
             activeSource = SourceA;
