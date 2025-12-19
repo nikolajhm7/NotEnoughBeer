@@ -41,4 +41,12 @@ public class SFXManager : MonoBehaviour
 
         AudioSource.PlayClipAtPoint(entry.clip, position, entry.volume);
     }
+
+    public void Stop()
+    {
+        if (source != null)
+        {
+            source.Stop();
+        }
+    }
 }

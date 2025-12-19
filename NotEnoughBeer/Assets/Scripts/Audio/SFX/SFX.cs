@@ -7,5 +7,6 @@ public enum SFX
     OpenComputer,
     PlaceMachine,
     Pop,
-    Purchase
+    Purchase,
+    IntroSpeech,
 }
