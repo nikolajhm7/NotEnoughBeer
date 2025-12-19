@@ -26,7 +26,7 @@ public class FermentationUI : MonoBehaviour
     [Header("Display Settings")]
     [SerializeField] private string greenPrefix = "Green: ";
     [SerializeField] private string redPrefix = "Red: ";
-    [SerializeField] private string percentagePrefix = "Green %: ";
+    [SerializeField] private string percentagePrefix = "Score: ";
     [SerializeField] private string timerPrefix = "Time: ";
     [SerializeField] private int decimalPlaces = 1;
     

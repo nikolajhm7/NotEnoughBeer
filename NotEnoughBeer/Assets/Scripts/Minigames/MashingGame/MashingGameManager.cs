@@ -155,9 +155,6 @@ public class MashingGameManager : MonoBehaviour
         
         // Hide all game objects
         SetGameObjectsActive(false);
-        
-        // Reset game state
-        ResetGame();
     }
     
     /// <summary>
@@ -242,35 +239,6 @@ public class MashingGameManager : MonoBehaviour
         {
             finalScoreText.text = $"Final Score: {gameScorer.GetScoreInt()}";
         }
-    }
-    
-    /// <summary>
-    /// Reset the game to initial state
-    /// </summary>
-    private void ResetGame()
-    {
-        // Reset scorer
-        if (gameScorer != null)
-        {
-            gameScorer.ResetScore();
-            gameScorer.enabled = false;
-        }
-        
-        // Reset log pile to 4 logs
-        if (logPileCycler != null)
-        {
-            logPileCycler.currentPileIndex = 4;
-            logPileCycler.enabled = false;
-        }
-        
-        // Reset thermometer to 60 degrees
-        if (thermometer != null)
-        {
-            thermometer.SetTemperature(60f);
-            thermometer.enabled = false;
-        }
-        
-        gameTimer = 0f;
     }
     
     /// <summary>

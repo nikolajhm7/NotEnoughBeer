@@ -20,6 +20,10 @@ public class FermentationGameManager : MonoBehaviour
     [SerializeField] private RingScript ringScript;
     [SerializeField] private NeedleScript needleScript;
     
+    [Header("UI Panels")]
+    [SerializeField] private GameObject startPanel;
+    [SerializeField] private GameObject howToPlayPanel;
+    
     [Header("Events")]
     public UnityEvent OnGameStart;
     public UnityEvent OnGameEnd;
@@ -150,7 +154,7 @@ public class FermentationGameManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No MinigameBridge found – staying in Fermentation scene.");
+            Debug.LogWarning("No MinigameBridge found ï¿½ staying in Fermentation scene.");
         }
     }
 
@@ -193,6 +197,32 @@ public class FermentationGameManager : MonoBehaviour
     public void OnResetButtonPressed()
     {
         ResetGame();
+    }
+    
+    public void OnHowToPlayButtonPressed()
+    {
+        if (startPanel != null)
+        {
+            startPanel.SetActive(false);
+        }
+        
+        if (howToPlayPanel != null)
+        {
+            howToPlayPanel.SetActive(true);
+        }
+    }
+    
+    public void OnHowToPlayBackButtonPressed()
+    {
+        if (howToPlayPanel != null)
+        {
+            howToPlayPanel.SetActive(false);
+        }
+        
+        if (startPanel != null)
+        {
+            startPanel.SetActive(true);
+        }
     }
 
     // Helper methods for other scripts to check game state

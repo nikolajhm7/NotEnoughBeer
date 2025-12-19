@@ -14,6 +14,7 @@ public class BottleGameManager : MonoBehaviour
 {
     [Header("UI Elements")]
     [SerializeField] private GameObject startScreen;
+    [SerializeField] private GameObject howToPlayPanel;
     [SerializeField] private TextMeshProUGUI countdownText;
     [SerializeField] private GameObject gameUI;
     [SerializeField] private GameObject endScreen;
@@ -116,6 +117,32 @@ public class BottleGameManager : MonoBehaviour
         selectedDifficulty = GameDifficulty.Hard;
         UpdateDifficultyButtons();
         Debug.Log("Difficulty set to Hard");
+    }
+    
+    public void OnHowToPlayButtonPressed()
+    {
+        if (startScreen != null)
+        {
+            startScreen.SetActive(false);
+        }
+        
+        if (howToPlayPanel != null)
+        {
+            howToPlayPanel.SetActive(true);
+        }
+    }
+    
+    public void OnHowToPlayBackButtonPressed()
+    {
+        if (howToPlayPanel != null)
+        {
+            howToPlayPanel.SetActive(false);
+        }
+        
+        if (startScreen != null)
+        {
+            startScreen.SetActive(true);
+        }
     }
     
     void UpdateDifficultyButtons()
@@ -240,7 +267,7 @@ public class BottleGameManager : MonoBehaviour
         if (MinigameBridge.Instance != null)
         {
             MinigameBridge.Instance.FinishMinigame(scoreValue);
-            return; // we’re leaving this scene, no need to show endScreen
+            return; // weï¿½re leaving this scene, no need to show endScreen
         }
 
         // ===== Fallback: old behaviour if no bridge exists =====
