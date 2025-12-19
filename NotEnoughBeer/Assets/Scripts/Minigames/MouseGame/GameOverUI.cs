@@ -2,8 +2,11 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
 
+
 public class GameOverUI : MonoBehaviour
 {
+	public RatDamageApplier ratDamage;
+
 	[Header("Refs")]
 	public GameObject panel;             
 	public TMP_Text finalScoreText;
@@ -44,16 +47,28 @@ public class GameOverUI : MonoBehaviour
 		Cursor.visible = true;
 	}
 
-	// --- Dette er den ENESTE knap ---
 	public void OnContinueButton()
 	{
+		Debug.Log("[GameOverUI] Continue pressed");
+
 		Time.timeScale = 1f;
 
-		// Reset score – så minigamet starter fra 0 næste gang
+		int score = ScoreSystem.Instance ? ScoreSystem.Instance.TotalScore : 0;
+		Debug.Log($"[GameOverUI] Score = {score}");
+
+		if (ratDamage == null)
+		{
+			Debug.LogError("[GameOverUI] ratDamage IS NULL");
+		}
+		else
+		{
+			Debug.Log("[GameOverUI] ratDamage found, applying loss");
+			ratDamage.ApplyLossToSaveFile(score);
+		}
+
 		ScoreSystem.Instance?.ResetScore();
 
-		// Skift scene
 		SceneManager.LoadScene(continueSceneName);
-		Debug.Log(continueSceneName);
 	}
+
 }
