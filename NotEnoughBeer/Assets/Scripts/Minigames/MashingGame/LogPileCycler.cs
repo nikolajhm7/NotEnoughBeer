@@ -10,7 +10,7 @@ public class LogPileCycler : MonoBehaviour
     [Header("Current Pile")]
     [Tooltip("Current pile index (0-5 = number of logs). Change this to cycle through different piles")]
     [Range(0, 5)]
-    public int currentPileIndex = 0;
+    public int currentPileIndex = 4;
     
     [Header("Fire Integration")]
     [Tooltip("Optional: Reference to FireManager to auto-update fires when logs change")]

@@ -9,6 +9,10 @@ public class MashingGameScorer : MonoBehaviour
     [Tooltip("The spoon stirrer to monitor stirring")]
     public SpoonStirrer spoonStirrer;
     
+    [Header("UI Elements")]
+    [Tooltip("Text to display the current score")]
+    public TMPro.TextMeshProUGUI scoreText;
+    
     [Header("Scoring Criteria")]
     [Tooltip("Minimum temperature to score (default 60)")]
     public float minTemperature = 60f;
@@ -23,7 +27,7 @@ public class MashingGameScorer : MonoBehaviour
     public float minStirTimeRequired = 1f;
     
     [Tooltip("Points gained per second when conditions are met")]
-    public float pointsPerSecond = 10f;
+    public float pointsPerSecond = 1f;
     
     [Header("Current State")]
     [Tooltip("Current score")]
@@ -91,6 +95,9 @@ public class MashingGameScorer : MonoBehaviour
         {
             currentScore += pointsPerSecond * Time.deltaTime;
         }
+        
+        // Update score display
+        UpdateScoreUI();
     }
     
     private bool IsTemperatureInRange()
@@ -148,5 +155,16 @@ public class MashingGameScorer : MonoBehaviour
         bool stirOK = recentStirTime >= minStirTimeRequired;
         
         return $"Temp: {temp:F1}° ({(tempOK ? "✓" : "✗")}) | Stir: {recentStirTime:F1}s/{minStirTimeRequired}s ({(stirOK ? "✓" : "✗")}) | Score: {GetScoreInt()}";
+    }
+    
+    /// <summary>
+    /// Update the score display UI
+    /// </summary>
+    private void UpdateScoreUI()
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = $"Score: {GetScoreInt()}";
+        }
     }
 }
