@@ -1,14 +1,16 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.InputSystem;   // ligesom i PlayerInteractor
+using UnityEngine.InputSystem;   
 
 public class RatAttackManager : MonoBehaviour
 {
 	[Header("Minigame")]
 	public string minigameSceneName = "Milo Scene";
 
+	[Header("Save")]
+	[SerializeField] SaveManager saveManager;
+
 	[Header("Input")]
-	// + på numpad – kan ændres i Inspector
 	public Key triggerKey = Key.NumpadPlus;
 
 	[Header("Random rotteangreb (kan slås fra)")]
@@ -47,6 +49,8 @@ public class RatAttackManager : MonoBehaviour
 	{
 		// Sørg for at tiden kører normalt når vi skifter scene
 		Time.timeScale = 1f;
+
+		saveManager.Save();
 
 		Debug.Log("Starter minigame: " + minigameSceneName);
 		SceneManager.LoadScene(minigameSceneName);

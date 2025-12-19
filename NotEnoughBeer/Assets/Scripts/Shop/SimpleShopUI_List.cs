@@ -6,13 +6,13 @@ using UnityEngine.UI;
 public class SimpleShopUI_List : MonoBehaviour
 {
     [Header("Root")]
-    [SerializeField] GameObject rootPanel;               // enable/disable this panel
+    [SerializeField] GameObject rootPanel;
 
     [Header("Buy List (LEFT)")]
-    [SerializeField] Transform listContainer;            // parent for rows
-    [SerializeField] GameObject rowPrefab;               // child names: Name(TMP), Price(TMP), BuyButton(Button)
+    [SerializeField] Transform listContainer;
+    [SerializeField] GameObject rowPrefab;
     [SerializeField] List<MachineDefinition> catalog = new List<MachineDefinition>();
-    [SerializeField] MachinePlacer placer;               // drag your MachinePlacer here
+    [SerializeField] MachinePlacer placer;
 
     [Header("Sell (RIGHT) - beer")]
     [SerializeField] TMP_Text beerCountText;
@@ -20,21 +20,23 @@ public class SimpleShopUI_List : MonoBehaviour
     [SerializeField] Button sellAllButton;
     [SerializeField] Button addBeerDebugButton;
 
+    [Header("NEW: Sell Filters (optional)")]
+    [SerializeField] TMP_Dropdown sellRarityDropdown;     // Common..Legendary (optional)
+    [SerializeField] Toggle sellFromPocketToggle;         // optional
+    [SerializeField] Toggle sellFromContainersToggle;     // optional
+
     [Header("HUD")]
     [SerializeField] TMP_Text moneyText;
     [SerializeField] TMP_Text toastText;
 
     [Header("Garage Upgrade")]
-    [SerializeField] GridManager grid;                   // assign TileManager here in Inspector
+    [SerializeField] GridManager grid;
 
-    [Header("Garage Upgrade")]
-    
-    [SerializeField] SaveManager saveManager;   
-
+    [Header("Save")]
+    [SerializeField] SaveManager saveManager;
 
     public bool IsOpen => rootPanel && rootPanel.activeSelf;
-
-    readonly List<GameObject> _spawnedRows = new List<GameObject>();
+    readonly List<GameObject> _spawnedRows = new();
 
     void Awake()
     {
@@ -42,6 +44,8 @@ public class SimpleShopUI_List : MonoBehaviour
         BuildList();
         HookSell();
         RefreshAll();
+
+        BuildSellRarityDropdownIfNeeded();
     }
 
     public void Open()
@@ -57,7 +61,7 @@ public class SimpleShopUI_List : MonoBehaviour
         if (rootPanel) rootPanel.SetActive(false);
     }
 
-    // ---------- BUY LIST (machines + ingredients + garage) ----------
+    // ---------- BUY LIST ----------
     void BuildList()
     {
         foreach (var go in _spawnedRows) Destroy(go);
@@ -66,6 +70,7 @@ public class SimpleShopUI_List : MonoBehaviour
         foreach (var def in catalog)
         {
             if (!def) continue;
+
             var row = Instantiate(rowPrefab, listContainer);
             _spawnedRows.Add(row);
 
@@ -78,11 +83,8 @@ public class SimpleShopUI_List : MonoBehaviour
 
             int displayCost = def.cost;
 
-            // special case: garage upgrade uses dynamic cost
             if (!string.IsNullOrEmpty(def.id) && def.id.ToLower() == "garage_upgrade")
-            {
                 displayCost = GetGarageUpgradeCost();
-            }
 
             if (price) price.text = $"$ {displayCost}";
 
@@ -108,31 +110,18 @@ public class SimpleShopUI_List : MonoBehaviour
 
         switch (id)
         {
-            case "barley":
-                BuyBarley(def);
-                break;
-
-            case "yeast":
-                BuyYeast(def);
-                break;
-
-            case "bottles":
-                BuyBottles(def);
-                break;
-
-            case "garage_upgrade":
-                UpgradeGarageFromDef(def);
-                break;
-
-            default:
-                // normal machine → place with MachinePlacer
-                Equip(def);
-                break;
+            case "barley": BuyBarley(def); break;
+            case "yeast": BuyYeast(def); break;
+            case "bottles": BuyBottles(def); break;
+            case "garage_upgrade": UpgradeGarageFromDef(def); break;
+            default: Equip(def); break;
         }
 
-        SFXManager.Instance.Play(SFX.Purchase);
+        if (SFXManager.Instance != null)
+            SFXManager.Instance.Play(SFX.Purchase);
     }
 
+    // ---------- BUY INGREDIENTS ----------
     void BuyBarley(MachineDefinition def)
     {
         if (!Currency.Instance.SpendCurrency(def.cost))
@@ -141,16 +130,28 @@ public class SimpleShopUI_List : MonoBehaviour
             return;
         }
 
+        int amount = 10;
+
+        // NEW: PocketInventory first
+        if (PocketInventory.Instance != null)
+        {
+            if (!PocketInventory.Instance.Inv.TryAdd(ItemId.Barley, amount))
+            {
+                Toast("Pocket full! Buy/place a container.");
+                return;
+            }
+            Toast($"Bought {amount} barley.");
+            RefreshAll();
+            return;
+        }
+
+        // FALLBACK: old IngredientStorage
         if (IngredientStorage.Instance != null)
         {
-            int amount = 10;
             IngredientStorage.Instance.AddBarley(amount);
             Toast($"Bought {amount} barley.");
         }
-        else
-        {
-            Toast("No IngredientStorage in scene.");
-        }
+        else Toast("No PocketInventory or IngredientStorage in scene.");
 
         RefreshAll();
     }
@@ -163,16 +164,26 @@ public class SimpleShopUI_List : MonoBehaviour
             return;
         }
 
+        int amount = 5;
+
+        if (PocketInventory.Instance != null)
+        {
+            if (!PocketInventory.Instance.Inv.TryAdd(ItemId.Yeast, amount))
+            {
+                Toast("Pocket full! Buy/place a container.");
+                return;
+            }
+            Toast($"Bought {amount} yeast.");
+            RefreshAll();
+            return;
+        }
+
         if (IngredientStorage.Instance != null)
         {
-            int amount = 5;
-            IngredientStorage.Instance.Yeast += amount;
+            IngredientStorage.Instance.AddYeast(amount);
             Toast($"Bought {amount} yeast.");
         }
-        else
-        {
-            Toast("No IngredientStorage in scene.");
-        }
+        else Toast("No PocketInventory or IngredientStorage in scene.");
 
         RefreshAll();
     }
@@ -185,16 +196,26 @@ public class SimpleShopUI_List : MonoBehaviour
             return;
         }
 
+        int amount = 12;
+
+        if (PocketInventory.Instance != null)
+        {
+            if (!PocketInventory.Instance.Inv.TryAdd(ItemId.Bottles, amount))
+            {
+                Toast("Pocket full! Buy/place a container.");
+                return;
+            }
+            Toast($"Bought {amount} bottles.");
+            RefreshAll();
+            return;
+        }
+
         if (IngredientStorage.Instance != null)
         {
-            int amount = 12;
-            IngredientStorage.Instance.Bottles += amount;
+            IngredientStorage.Instance.AddBottles(amount);
             Toast($"Bought {amount} bottles.");
         }
-        else
-        {
-            Toast("No IngredientStorage in scene.");
-        }
+        else Toast("No PocketInventory or IngredientStorage in scene.");
 
         RefreshAll();
     }
@@ -207,9 +228,9 @@ public class SimpleShopUI_List : MonoBehaviour
             return;
         }
 
-        placer.EquipFromUI(def);                // ghost + spending handled by MachinePlacer
+        placer.EquipFromUI(def);
         Toast($"Equipped {def.name}. Place with Space or LMB.");
-        Hide();                                 // optional: close shop so player can place immediately
+        Hide();
     }
 
     // ---------- SELL ----------
@@ -226,6 +247,30 @@ public class SimpleShopUI_List : MonoBehaviour
                     return;
                 }
 
+                // If new system exists, use it. Otherwise fallback to BeerStorage.
+                if (PocketInventory.Instance != null || StorageRegistry.Instance != null)
+                {
+                    var rarity = GetSelectedRarityOrNull(); // null => sell all rarities
+                    bool fromPocket = sellFromPocketToggle ? sellFromPocketToggle.isOn : true;
+                    bool fromContainers = sellFromContainersToggle ? sellFromContainersToggle.isOn : true;
+
+                    int sold;
+                    int payout;
+                    SellBeer_NewSystem(rarity, fromPocket, fromContainers, out sold, out payout);
+
+                    if (sold <= 0)
+                    {
+                        Toast("No beer to sell.");
+                        return;
+                    }
+
+                    Currency.Instance.AddCurrency(payout);
+                    Toast($"Sold {sold} bottles for ${payout}.");
+                    RefreshAll();
+                    return;
+                }
+
+                // FALLBACK: old BeerStorage sell all
                 if (BeerStorage.Instance == null)
                 {
                     Toast("No BeerStorage in scene.");
@@ -233,7 +278,7 @@ public class SimpleShopUI_List : MonoBehaviour
                 }
 
                 int totalBottles;
-                int payout = BeerStorage.Instance.SellAll(out totalBottles);
+                int payoutOld = BeerStorage.Instance.SellAll(out totalBottles);
 
                 if (totalBottles <= 0)
                 {
@@ -241,8 +286,8 @@ public class SimpleShopUI_List : MonoBehaviour
                     return;
                 }
 
-                Currency.Instance.AddCurrency(payout);
-                Toast($"Sold {totalBottles} bottles for ${payout}.");
+                Currency.Instance.AddCurrency(payoutOld);
+                Toast($"Sold {totalBottles} bottles for ${payoutOld}.");
                 RefreshAll();
             });
         }
@@ -252,9 +297,71 @@ public class SimpleShopUI_List : MonoBehaviour
             addBeerDebugButton.onClick.RemoveAllListeners();
             addBeerDebugButton.onClick.AddListener(() =>
             {
-                BeerStorage.Instance?.AddBeer(5); // common debug
+                // NEW: add 5 common beer into pocket if possible
+                if (PocketInventory.Instance != null)
+                {
+                    PocketInventory.Instance.Inv.TryAdd(ItemId.Beer_Common, 5);
+                    RefreshSellTexts();
+                    return;
+                }
+
+                // FALLBACK
+                BeerStorage.Instance?.AddBeer(5);
                 RefreshSellTexts();
             });
+        }
+    }
+
+    void SellBeer_NewSystem(BeerStorage.BeerRarity? rarityFilter, bool fromPocket, bool fromContainers, out int soldTotal, out int payoutTotal)
+    {
+        soldTotal = 0;
+        payoutTotal = 0;
+
+        // if no filter: loop all beer item IDs
+        if (!rarityFilter.HasValue)
+        {
+            SellBeerItem(ItemId.Beer_Common, fromPocket, fromContainers, ref soldTotal, ref payoutTotal);
+            SellBeerItem(ItemId.Beer_Uncommon, fromPocket, fromContainers, ref soldTotal, ref payoutTotal);
+            SellBeerItem(ItemId.Beer_Rare, fromPocket, fromContainers, ref soldTotal, ref payoutTotal);
+            SellBeerItem(ItemId.Beer_Mythical, fromPocket, fromContainers, ref soldTotal, ref payoutTotal);
+            SellBeerItem(ItemId.Beer_Legendary, fromPocket, fromContainers, ref soldTotal, ref payoutTotal);
+            return;
+        }
+
+        var id = BeerItemForRarity(rarityFilter.Value);
+        SellBeerItem(id, fromPocket, fromContainers, ref soldTotal, ref payoutTotal);
+    }
+
+    void SellBeerItem(ItemId beerId, bool fromPocket, bool fromContainers, ref int soldTotal, ref int payoutTotal)
+    {
+        int unitPrice = GetUnitPriceForBeerId(beerId);
+
+        if (fromPocket && PocketInventory.Instance != null)
+        {
+            var inv = PocketInventory.Instance.Inv;
+            int have = inv.Get(beerId);
+            if (have > 0)
+            {
+                inv.TryRemove(beerId, have);
+                soldTotal += have;
+                payoutTotal += have * unitPrice;
+            }
+        }
+
+        if (fromContainers && StorageRegistry.Instance != null)
+        {
+            foreach (var c in StorageRegistry.Instance.Containers)
+            {
+                if (!c) continue;
+                var inv = c.Inv;
+
+                int have = inv.Get(beerId);
+                if (have <= 0) continue;
+
+                inv.TryRemove(beerId, have);
+                soldTotal += have;
+                payoutTotal += have * unitPrice;
+            }
         }
     }
 
@@ -263,16 +370,12 @@ public class SimpleShopUI_List : MonoBehaviour
     {
         if (!grid) return 0;
 
-        // base garage is 5x5
         int baseWidth = 5;
         int extra = Mathf.Max(0, grid.width - baseWidth);
-
-        // Expand(1,1,1,1) increases width by 2 each time: 5,7,9,11...
         int level = extra / 2;
         return level;
     }
 
-    // 1st: 400, 2nd: 500, 3rd: 700, 4th: 900, then +200 each level
     int GetGarageUpgradeCost()
     {
         int level = GetGarageUpgradeLevel();
@@ -301,19 +404,13 @@ public class SimpleShopUI_List : MonoBehaviour
             return;
         }
 
-        // expand 1 tile in every direction
         grid.Expand(addRight: 1, addLeft: 1, addUp: 1, addDown: 1);
-
-        // 🔁 Rebuild grid + machines + interactables properly
-        
 
         Toast($"Garage upgraded! New size: {grid.width} x {grid.height} (cost ${cost}).");
 
-        // rebuild UI list for new upgrade cost
         BuildList();
         RefreshAll();
     }
-
 
     // ---------- UI refresh ----------
     void RefreshAll()
@@ -325,24 +422,114 @@ public class SimpleShopUI_List : MonoBehaviour
     void RefreshMoney()
     {
         if (moneyText)
-        {
-            moneyText.text =
-                Currency.Instance ? $"$ {Currency.Instance.CurrencyAmount}" : "$ 0";
-        }
+            moneyText.text = Currency.Instance ? $"$ {Currency.Instance.CurrencyAmount}" : "$ 0";
     }
 
     void RefreshSellTexts()
     {
         if (unitPriceText) unitPriceText.text = "Value varies by rarity";
-        if (beerCountText)
+
+        if (!beerCountText) return;
+
+        // NEW system totals
+        if (PocketInventory.Instance != null || StorageRegistry.Instance != null)
         {
-            int count = BeerStorage.Instance ? BeerStorage.Instance.TotalBottles : 0;
-            beerCountText.text = $"{count} units";
+            int total =
+                GetBeerCount(ItemId.Beer_Common) +
+                GetBeerCount(ItemId.Beer_Uncommon) +
+                GetBeerCount(ItemId.Beer_Rare) +
+                GetBeerCount(ItemId.Beer_Mythical) +
+                GetBeerCount(ItemId.Beer_Legendary);
+
+            beerCountText.text = $"{total} units";
+            return;
         }
+
+        // FALLBACK old system
+        int countOld = BeerStorage.Instance ? BeerStorage.Instance.TotalBottles : 0;
+        beerCountText.text = $"{countOld} units";
+    }
+
+    int GetBeerCount(ItemId id)
+    {
+        int total = 0;
+
+        if (PocketInventory.Instance != null)
+            total += PocketInventory.Instance.Inv.Get(id);
+
+        if (StorageRegistry.Instance != null)
+        {
+            foreach (var c in StorageRegistry.Instance.Containers)
+                if (c) total += c.Inv.Get(id);
+        }
+
+        return total;
     }
 
     void Toast(string msg)
     {
         if (toastText) toastText.text = msg;
+    }
+
+    // ---------- Sell dropdown helpers ----------
+    void BuildSellRarityDropdownIfNeeded()
+    {
+        if (!sellRarityDropdown) return;
+
+        sellRarityDropdown.ClearOptions();
+        sellRarityDropdown.AddOptions(new List<string>
+        {
+            "All",
+            "Common",
+            "Uncommon",
+            "Rare",
+            "Mythical",
+            "Legendary"
+        });
+    }
+
+    BeerStorage.BeerRarity? GetSelectedRarityOrNull()
+    {
+        if (!sellRarityDropdown) return null;
+
+        // 0 = All
+        switch (sellRarityDropdown.value)
+        {
+            case 1: return BeerStorage.BeerRarity.Common;
+            case 2: return BeerStorage.BeerRarity.Uncommon;
+            case 3: return BeerStorage.BeerRarity.Rare;
+            case 4: return BeerStorage.BeerRarity.Mythical;
+            case 5: return BeerStorage.BeerRarity.Legendary;
+            default: return null;
+        }
+    }
+
+    static ItemId BeerItemForRarity(BeerStorage.BeerRarity r)
+    {
+        return r switch
+        {
+            BeerStorage.BeerRarity.Common => ItemId.Beer_Common,
+            BeerStorage.BeerRarity.Uncommon => ItemId.Beer_Uncommon,
+            BeerStorage.BeerRarity.Rare => ItemId.Beer_Rare,
+            BeerStorage.BeerRarity.Mythical => ItemId.Beer_Mythical,
+            BeerStorage.BeerRarity.Legendary => ItemId.Beer_Legendary,
+            _ => ItemId.Beer_Common
+        };
+    }
+
+    int GetUnitPriceForBeerId(ItemId id)
+    {
+        // Reuse BeerStorage prices as the “price table” for now. :contentReference[oaicite:2]{index=2}
+        if (BeerStorage.Instance == null) return 0;
+
+        return id switch
+        {
+            ItemId.Beer_Common => BeerStorage.Instance.commonPrice,
+            ItemId.Beer_Uncommon => BeerStorage.Instance.uncommonPrice,
+            ItemId.Beer_Rare => BeerStorage.Instance.rarePrice,
+            ItemId.Beer_Mythical => BeerStorage.Instance.mythicalPrice,
+            ItemId.Beer_Legendary => BeerStorage.Instance.legendaryPrice,
+            _ => 0
+        };
     }
 }
