@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0da5dcb2d47f9a047ac90bfa689206e6, type: 3}
   m_Name: ConditioningMachine
   m_EditorClassIdentifier: 
-  id: conditioning_machine
+  id: Conditioning Machine
   prefab: {fileID: 5648149503036158546, guid: cbfb0d7f23ef53d4793d96a812b1effd, type: 3}
   cost: 300
   occupiedOffsets:

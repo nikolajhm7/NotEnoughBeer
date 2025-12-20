@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0da5dcb2d47f9a047ac90bfa689206e6, type: 3}
   m_Name: PackagingMachine
   m_EditorClassIdentifier: 
-  id: packaging_machine
+  id: Packaging Machine
   prefab: {fileID: 5432978936752341020, guid: a80b2c02bffc7624dab7cca029baa671, type: 3}
   cost: 100
   occupiedOffsets:

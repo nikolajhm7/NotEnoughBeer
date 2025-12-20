@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0da5dcb2d47f9a047ac90bfa689206e6, type: 3}
   m_Name: MaltingMachine
   m_EditorClassIdentifier: 
-  id: malting_machine
+  id: Malting Machine
   prefab: {fileID: 1045860063181058821, guid: e1f548f81ce0eb84ca0d8c040ad79192, type: 3}
   cost: 100
   occupiedOffsets:

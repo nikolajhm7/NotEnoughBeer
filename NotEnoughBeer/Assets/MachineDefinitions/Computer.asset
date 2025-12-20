@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0da5dcb2d47f9a047ac90bfa689206e6, type: 3}
   m_Name: Computer
   m_EditorClassIdentifier: 
-  id: computer
+  id: Computer
   prefab: {fileID: 4336812320087514361, guid: cfb9572c2a1177a45bb14ef7030d0008, type: 3}
   cost: 0
   occupiedOffsets:

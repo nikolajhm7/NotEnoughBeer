@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0da5dcb2d47f9a047ac90bfa689206e6, type: 3}
   m_Name: MashingMachine
   m_EditorClassIdentifier: 
-  id: mashing_machine
+  id: Mashing Machine
   prefab: {fileID: 2257093576052749244, guid: 9bdcc84da752d2642a20057dc9e1592e, type: 3}
   cost: 100
   occupiedOffsets:

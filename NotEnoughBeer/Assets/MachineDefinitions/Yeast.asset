@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0da5dcb2d47f9a047ac90bfa689206e6, type: 3}
   m_Name: Yeast
   m_EditorClassIdentifier: 
-  id: yeast
+  id: Yeast
   prefab: {fileID: 0}
   cost: 20
   occupiedOffsets:
