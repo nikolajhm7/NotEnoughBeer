@@ -80,5 +80,7 @@ public class IntroCutscene : MonoBehaviour
 
         MusicManager.Instance.Play("Main");
         MusicManager.Instance.SetMusicVolume(volume);
+
+        TutorialPopup.Instance.TryShowTutorial();
     }
 }

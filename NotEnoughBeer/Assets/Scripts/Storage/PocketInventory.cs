@@ -18,6 +18,16 @@ public class PocketInventory : MonoBehaviour
         Inv = new Inventory(capacity);
     }
 
+    private void Start()
+    {
+        Inv.OnChanged += OnInventoryChanged;
+    }
+
+    void OnInventoryChanged(ItemId id, int amount)
+    {
+        Debug.Log($"[PocketInventory] Inventory changed: {id} now has {amount} units.");
+    }
+
     public void SetCapacity(int c)
     {
         capacity = Mathf.Max(0, c);

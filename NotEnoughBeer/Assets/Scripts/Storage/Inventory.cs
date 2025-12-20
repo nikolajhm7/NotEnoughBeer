@@ -91,6 +91,11 @@ public class Inventory
     {
         Capacity = Math.Max(0, newCapacity);
     }
+
+    public IReadOnlyDictionary<ItemId, int> ItemCounts
+    {
+        get { return _counts; }
+    }
 }
 
 [Serializable]

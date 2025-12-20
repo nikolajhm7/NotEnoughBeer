@@ -2,10 +2,27 @@ using UnityEngine;
 
 public class TutorialPopup : MonoBehaviour
 {
-    public GameObject popupPanel;
-    public float showTime = 5f;
+    public static TutorialPopup Instance { get; private set; }
 
-    void Start()
+    public GameObject popupPanel;
+    public float showTime = 3f;
+
+    void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
+    void Hide()
+    {
+        popupPanel.SetActive(false);
+    }
+
+    public void TryShowTutorial()
     {
         if (!PlayerPrefs.HasKey("TutorialShown"))
         {
@@ -17,11 +34,5 @@ public class TutorialPopup : MonoBehaviour
         {
             popupPanel.SetActive(false);
         }
-        
-    }
-
-    void Hide()
-    {
-        popupPanel.SetActive(false);
     }
 }
