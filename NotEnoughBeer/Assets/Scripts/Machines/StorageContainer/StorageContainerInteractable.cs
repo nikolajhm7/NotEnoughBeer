@@ -51,7 +51,8 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
         sb.AppendLine("Storage:");
 
         foreach (var s in stacks)
-            sb.AppendLine($"{s.Id}: {s.Amount}");
+            sb.AppendLine($"{PrettyItemName(s.Id)}: {s.Amount}");
+
 
         sb.AppendLine($"({inv.TotalUnits}/{inv.Capacity})");
 
@@ -97,6 +98,25 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
 
         return moved;
     }
+
+    static string PrettyItemName(ItemId id)
+    {
+        return id switch
+        {
+            ItemId.Barley => "Barley",
+            ItemId.Yeast => "Yeast",
+            ItemId.Bottles => "Bottles",
+
+            ItemId.Beer_Common => "Common Beer",
+            ItemId.Beer_Uncommon => "Uncommon Beer",
+            ItemId.Beer_Rare => "Rare Beer",
+            ItemId.Beer_Mythical => "Mythical Beer",
+            ItemId.Beer_Legendary => "Legendary Beer",
+
+            _ => id.ToString().Replace("_", " ")
+        };
+    }
+
 
     int WithdrawMaterialsOnly()
     {
