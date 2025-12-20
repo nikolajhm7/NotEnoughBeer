@@ -78,7 +78,8 @@ public class SimpleShopUI_List : MonoBehaviour
             var price = row.transform.Find("Price")?.GetComponent<TMP_Text>();
             var btn = row.transform.Find("BuyButton")?.GetComponent<Button>();
 
-            var label = string.IsNullOrEmpty(def.id) ? def.name : def.id;
+            var label = def.name;
+
             if (name) name.text = label;
 
             int displayCost = def.cost;
