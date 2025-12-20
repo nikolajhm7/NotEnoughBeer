@@ -13,6 +13,7 @@ public class PlayerInteractor : MonoBehaviour
 
     [Header("Input")]
     public Key InteractKey = Key.F;
+    public Key SecondaryKey = Key.R;
 
     [Header("Behavior")]
     public bool HideInteractionWhenPaused = true;
@@ -26,7 +27,6 @@ public class PlayerInteractor : MonoBehaviour
         if (InteractionRoot && HideInteractionWhenPaused && Time.timeScale == 0)
         {
             InteractionRoot.SetActive(false);
-
             return;
         }
 
@@ -40,7 +40,6 @@ public class PlayerInteractor : MonoBehaviour
         if (current != null)
         {
             if (InteractionRoot) InteractionRoot.SetActive(true);
-
             SetInteractionText(current);
         }
         else
@@ -49,10 +48,21 @@ public class PlayerInteractor : MonoBehaviour
         }
 
         var kb = Keyboard.current;
-		var mouse = Mouse.current;
-		if ((kb != null && kb[InteractKey].wasPressedThisFrame)) 
+        if (kb == null) return;
+
+        // F = primary interact
+        if (kb[InteractKey].wasPressedThisFrame)
         {
             current?.Interact(this);
+        }
+
+        // R = secondary interact (show storage)
+        if (kb[SecondaryKey].wasPressedThisFrame)
+        {
+            if (current is StorageContainerInteractable storage)
+            {
+                storage.ShowStorageContents_Public();
+            }
         }
     }
 
@@ -60,9 +70,22 @@ public class PlayerInteractor : MonoBehaviour
     {
         if (!InteractionText) return;
 
-        if (interactable == null) { InteractionText.gameObject.SetActive(false); return; }
+        if (interactable == null)
+        {
+            InteractionText.gameObject.SetActive(false);
+            return;
+        }
 
-        InteractionText.text = $"[{InteractKey}] - {interactable.GetInteractionDescription(this)}";
+        string text = $"[{InteractKey}] - {interactable.GetInteractionDescription(this)}";
+
+        
+        if (interactable is StorageContainerInteractable)
+        {
+            text += $"\n[{SecondaryKey}] - Show storage";
+        }
+
+        InteractionText.text = text;
         InteractionText.gameObject.SetActive(true);
     }
+
 }

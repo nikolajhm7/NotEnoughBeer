@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class StorageContainerInteractable : MonoBehaviour, IInteractable
 {
@@ -9,7 +8,8 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
 
     void Awake()
     {
-        if (container == null) container = GetComponent<StorageContainer>();
+        if (container == null)
+            container = GetComponent<StorageContainer>();
     }
 
     public bool CanInteract(PlayerInteractor interactor)
@@ -19,8 +19,43 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
 
     public string GetInteractionDescription(PlayerInteractor interactor)
     {
-        // Always show both actions (two-line hint)
         return "Deposit all\nShift+F - Withdraw materials";
+    }
+
+    // 🔹 CALLED BY PlayerInteractor (R key)
+    public void ShowStorageContents_Public()
+    {
+        ShowStorageContents();
+    }
+
+    void ShowStorageContents()
+    {
+        if (container == null || container.Inv == null)
+        {
+            NotificationService.Instance?.Show("Storage is missing.");
+            return;
+        }
+
+        var inv = container.Inv;
+
+        if (inv.TotalUnits <= 0)
+        {
+            NotificationService.Instance?.Show("Storage: Empty");
+            return;
+        }
+
+        var stacks = inv.ToStacks();
+        stacks.Sort((a, b) => a.Id.CompareTo(b.Id));
+
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine("Storage:");
+
+        foreach (var s in stacks)
+            sb.AppendLine($"{s.Id}: {s.Amount}");
+
+        sb.AppendLine($"({inv.TotalUnits}/{inv.Capacity})");
+
+        NotificationService.Instance?.Show(sb.ToString());
     }
 
     public void Interact(PlayerInteractor interactor)
@@ -36,9 +71,13 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
         int moved = shift ? WithdrawMaterialsOnly() : DepositAll();
 
         if (shift)
-            NotificationService.Instance?.Show(moved > 0 ? $"Withdrew {moved} materials." : "Nothing to withdraw (or pocket full).");
+            NotificationService.Instance?.Show(
+                moved > 0 ? $"Withdrew {moved} materials." : "Nothing to withdraw (or pocket full)."
+            );
         else
-            NotificationService.Instance?.Show(moved > 0 ? $"Deposited {moved} items." : "Nothing to deposit (or container full).");
+            NotificationService.Instance?.Show(
+                moved > 0 ? $"Deposited {moved} items." : "Nothing to deposit (or container full)."
+            );
     }
 
     int DepositAll()
@@ -46,12 +85,10 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
         var pocket = PocketInventory.Instance.Inv;
         int moved = 0;
 
-        // Deposit materials
         moved += Move(pocket, container.Inv, ItemId.Barley);
         moved += Move(pocket, container.Inv, ItemId.Yeast);
         moved += Move(pocket, container.Inv, ItemId.Bottles);
 
-        // Deposit beer too (keep this if you want)
         moved += Move(pocket, container.Inv, ItemId.Beer_Common);
         moved += Move(pocket, container.Inv, ItemId.Beer_Uncommon);
         moved += Move(pocket, container.Inv, ItemId.Beer_Rare);
@@ -61,7 +98,6 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
         return moved;
     }
 
-    // ✅ Withdraw ONLY materials (not beer)
     int WithdrawMaterialsOnly()
     {
         var pocket = PocketInventory.Instance.Inv;
@@ -83,10 +119,10 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
         if (canFit <= 0) return 0;
 
         if (!from.TryRemove(id, canFit)) return 0;
+
         if (!to.TryAdd(id, canFit))
         {
-            // rollback
-            from.TryAdd(id, canFit);
+            from.TryAdd(id, canFit); // rollback
             return 0;
         }
 
@@ -95,7 +131,7 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
 
     static bool IsShiftHeld()
     {
-        var kb = Keyboard.current;
+        var kb = UnityEngine.InputSystem.Keyboard.current;
         if (kb == null) return false;
         return kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
     }
