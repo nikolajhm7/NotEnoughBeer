@@ -30,14 +30,14 @@ public class RatAttackManager : MonoBehaviour
 
 	void Update()
 	{
-		// 1) Manuel start med + (samme stil som PlayerInteractor)
+		
 		var kb = Keyboard.current;
 		if (kb != null && kb[triggerKey].wasPressedThisFrame)
 		{
 			StartMinigame();
 		}
 
-		// 2) Random start (hvis du slår det til)
+		
 		if (enableRandomAttacks && Time.time >= nextAttackTime)
 		{
 			StartMinigame();
@@ -47,7 +47,7 @@ public class RatAttackManager : MonoBehaviour
 
 	private void StartMinigame()
 	{
-		// Sørg for at tiden kører normalt når vi skifter scene
+		
 		Time.timeScale = 1f;
 
 		saveManager.Save();

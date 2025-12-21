@@ -34,7 +34,7 @@ public class PlayerCombat : MonoBehaviour
 		if (Time.time - lastAttackTime < attackCooldown) return;
 		lastAttackTime = Time.time;
 
-		// Cellen foran Bob
+		
 		Vector2Int targetCell = Movement.CurrentCell + Movement.CurrentFacingDir;
 
 		

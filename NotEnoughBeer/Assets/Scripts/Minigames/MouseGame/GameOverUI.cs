@@ -25,7 +25,7 @@ public class GameOverUI : MonoBehaviour
 	{
 		if (ScoreSystem.Instance != null)
 		{
-			// Opdater highscore
+			
 			ScoreSystem.Instance.TrySetHighScore();
 
 			int finalScore = ScoreSystem.Instance.TotalScore;

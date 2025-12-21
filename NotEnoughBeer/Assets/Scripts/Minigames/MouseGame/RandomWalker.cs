@@ -42,18 +42,18 @@ public class RandomWalker : MonoBehaviour
 		{
 			if (!isMoving)
 			{
-				// Hvis vi allerede er ved targetCell, så vælg en ny
+				
 				if (currentCell == targetCell)
 				{
 					yield return new WaitForSeconds(pause);
 					PickNextTarget();
 				}
 
-				// Bevæg mod targetCell i world-space
+				
 				yield return StartCoroutine(MoveToCell(targetCell));
 				currentCell = targetCell;
 
-				// (Valgfrit occupancy)
+				
 				if (useOccupancy) grid.SetOccupied(new[] { currentCell }, true);
 			}
 			yield return null;
@@ -72,7 +72,7 @@ public class RandomWalker : MonoBehaviour
 		while ((transform.position - dest).sqrMagnitude > 0.001f)
 		{
 			transform.position = Vector3.MoveTowards(transform.position, dest, speed * Time.deltaTime);
-			// (Valgfrit) kig i bevægelsesretning
+			
 			Vector3 dir = (dest - transform.position);
 			dir.y = 0f;
 			if (dir.sqrMagnitude > 0.0001f)
@@ -87,7 +87,7 @@ public class RandomWalker : MonoBehaviour
 
 	void PickNextTarget()
 	{
-		// Vælg én af 4 naboer tilfældigt (N,S,Ø,V). Du kan også give vægte eller “levy flights”.
+		
 		var candidates = new List<Vector2Int>
 		{
 			currentCell + Vector2Int.up,
@@ -96,27 +96,26 @@ public class RandomWalker : MonoBehaviour
 			currentCell + Vector2Int.right
 		};
 
-		// Filtrér kun til celler, der er inde i gridden og walkable
+		
 		candidates.RemoveAll(c => !grid.IsWalkable(c));
 
-		// Hvis occupancy bruges, undgå celler, der er optaget
+		
 		if (useOccupancy)
 			candidates.RemoveAll(c => grid.IsOccupied(c));
 
 		if (candidates.Count == 0)
 		{
-			// Stå stille et tick og prøv igen næste frame
 			targetCell = currentCell;
 			return;
 		}
 
 		targetCell = candidates[Random.Range(0, candidates.Count)];
 
-		// (Valgfrit) “reservér” næste celle for at mindske sammenstød
+		
 		if (useOccupancy)
 		{
-			grid.SetOccupied(new[] { currentCell }, false); // vi forlader den
-			grid.SetOccupied(new[] { targetCell }, true);   // vi er på vej dertil
+			grid.SetOccupied(new[] { currentCell }, false);
+			grid.SetOccupied(new[] { targetCell }, true); 
 		}
 	}
 }

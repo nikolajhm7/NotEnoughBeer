@@ -24,7 +24,7 @@ public class RatDamageApplier : MonoBehaviour
 	[Tooltip("Hvis true: mindst 1 fjernes pr item-type der findes, når loss>0.")]
 	public bool minimumOnePerTypeIfAnyLoss = false;
 
-	// ItemIds vi vil reducere (tilpas hvis du ikke bruger rarities)
+	
 	static readonly ItemId[] Targets =
 	{
 		ItemId.Barley,
@@ -37,10 +37,7 @@ public class RatDamageApplier : MonoBehaviour
 		ItemId.Beer_Legendary
 	};
 
-	/// <summary>
-	/// Læser save-filen for current slot, fjerner items, og skriver tilbage.
-	/// Milo-scenen behøver ikke have PocketInventory/SaveManager i scenen.
-	/// </summary>
+	
 	public (int removedTotal, float lossPercent) ApplyLossToSaveFile(int score)
 	{
 		string path = SaveManager.GetSlotPath(SaveManager.CurrentSlot);
@@ -79,7 +76,7 @@ public class RatDamageApplier : MonoBehaviour
 			removedTotal += RemoveFromSave(data, id, toRemove);
 		}
 
-		// skriv tilbage
+		
 		data.SavedAtIsoUtc = System.DateTime.UtcNow.ToString("o");
 		var outJson = JsonUtility.ToJson(data, true);
 		File.WriteAllText(path, outJson);
@@ -110,11 +107,11 @@ public class RatDamageApplier : MonoBehaviour
 	{
 		int left = amount;
 
-		// pocket først
+		
 		if (affectPocket && data.PocketItems != null && left > 0)
 			left -= RemoveFromStacks(data.PocketItems, id, left);
 
-		// så containers
+		
 		if (affectContainers && data.Containers != null && left > 0)
 		{
 			foreach (var c in data.Containers)
@@ -131,7 +128,7 @@ public class RatDamageApplier : MonoBehaviour
 	{
 		int total = 0;
 		for (int i = 0; i < stacks.Count; i++)
-			if (stacks[i].Id == id) total += stacks[i].Amount;   // matcher din JSON
+			if (stacks[i].Id == id) total += stacks[i].Amount;   
 		return total;
 	}
 
@@ -139,7 +136,7 @@ public class RatDamageApplier : MonoBehaviour
 	{
 		int left = amount;
 
-		// loop baglæns så RemoveAt er sikkert
+		
 		for (int i = stacks.Count - 1; i >= 0 && left > 0; i--)
 		{
 			if (stacks[i].Id != id) continue;
