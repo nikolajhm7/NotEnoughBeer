@@ -77,5 +77,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8ec78dfe1612a94ab008ed3b4b5eb26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  InteractionDescription: Brew some mfin beer
+  InteractionDescription: Brew some beer
   priority: 2
+  barleyPerBatch: 5
+  yeastPerBatch: 1
+  bottlesPerBatch: 12
+  minQuality: 5
+  maxQuality: 60
