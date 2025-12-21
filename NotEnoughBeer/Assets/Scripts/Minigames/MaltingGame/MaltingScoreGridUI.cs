@@ -4,18 +4,18 @@ using UnityEngine.InputSystem;
 public class MaltingScoreGridUI : MonoBehaviour
 {
 	[Header("Area (UI)")]
-	public RectTransform grainArea; // dit GrainArea (Image)
+	public RectTransform grainArea; 
 
 	[Header("Grid")]
 	public int cols = 25;
 	public int rows = 15;
 
 	[Header("Cleaning")]
-	[Range(0.01f, 0.5f)] public float brushRadius01 = 0.10f; // i area-UV (0..1)
-	public float cleanRatePerSecond = 2f; // hvor hurtigt man "renser"
+	[Range(0.01f, 0.5f)] public float brushRadius01 = 0.10f; 
+	public float cleanRatePerSecond = 2f; 
 	public bool requireHoldMouse0 = true;
 
-	public float CleanPercent { get; private set; } // 0..1
+	public float CleanPercent { get; private set; } 
 
 	float[,] progress;
 
@@ -61,13 +61,11 @@ public class MaltingScoreGridUI : MonoBehaviour
 	{
 		uv = default;
 
-		// screen -> local i rect
 		if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(grainArea, screenPos, null, out Vector2 local))
 			return false;
 
 		Rect r = grainArea.rect;
 
-		// inde i området?
 		if (local.x < r.xMin || local.x > r.xMax || local.y < r.yMin || local.y > r.yMax)
 			return false;
 

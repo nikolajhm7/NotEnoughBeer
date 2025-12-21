@@ -56,7 +56,7 @@ public class ObjectSpawner : MonoBehaviour
 					candidates.Add(c);
 			}
 
-		// Shuffle for tilfældighed
+		
 		for (int i = 0; i < candidates.Count; i++)
 		{
 			int j = Random.Range(i, candidates.Count);
