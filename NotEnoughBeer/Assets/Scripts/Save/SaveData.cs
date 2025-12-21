@@ -9,6 +9,10 @@ public class SaveData
     public string Version = "0.2.0";
     public string SavedAtIsoUtc;
 
+    // tutorials
+    public bool IntroCompleted;
+    public bool TutorialShown;
+
     // grid info
     public int GridWidth, GridHeight;
     public Vector3 Origin;

@@ -1492,9 +1492,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
+  m_Maskable: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1757,15 +1757,15 @@ MonoBehaviour:
     unlockDefinitionIds:
     - Storage Container
     - Malting Machine
-  - requiredTotalSales: 400
+  - requiredTotalSales: 600
     unlockDefinitionIds:
     - garage_upgrade
     - Mashing Machine
-  - requiredTotalSales: 600
+  - requiredTotalSales: 1200
     unlockDefinitionIds:
     - Fermentation Machine
     - Conditioning Machine
-  - requiredTotalSales: 700
+  - requiredTotalSales: 2000
     unlockDefinitionIds:
     - Packaging Machine
 --- !u!114 &573456235

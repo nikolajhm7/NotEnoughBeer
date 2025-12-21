@@ -24,10 +24,10 @@ public class TutorialPopup : MonoBehaviour
 
     public void TryShowTutorial()
     {
-        if (!PlayerPrefs.HasKey("TutorialShown"))
+        if (!SaveManager.Instance.TutorialShown)
         {
             popupPanel.SetActive(true);
-            PlayerPrefs.SetInt("TutorialShown", 1);
+            SaveManager.Instance.MarkTutorialAsShown();
             Invoke(nameof(Hide), showTime);
         }
         else

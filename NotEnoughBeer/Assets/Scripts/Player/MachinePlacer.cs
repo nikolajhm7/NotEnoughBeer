@@ -41,12 +41,6 @@ public class MachinePlacer : MonoBehaviour
             }
         }
 
-        
-        if (kb.gKey.wasPressedThisFrame && Currency.Instance != null)
-        {
-            Currency.Instance.AddCurrency(10);
-        }
-
         if (kb.rKey.wasPressedThisFrame)
         {
             Debug.Log("Rotating placement preview.");

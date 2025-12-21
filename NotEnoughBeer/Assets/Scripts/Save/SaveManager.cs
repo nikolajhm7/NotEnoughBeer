@@ -7,6 +7,8 @@ using System.Buffers.Text;
 
 public class SaveManager : MonoBehaviour
 {
+    public static SaveManager Instance { get; private set; }
+
     [Header("New Game Settings")]
     public string StarterMachineId = "computer";
     public MachineDefinition StarterMachineDef;
@@ -23,13 +25,15 @@ public class SaveManager : MonoBehaviour
     public bool AutoLoadOnStart = true;
     public int TotalSales { get; private set; }
 
-
-
     // Data
     Dictionary<string, MachineDefinition> DefinitionsById;
+    public bool IntroCutscenePlayed { get; private set; }
+    public bool TutorialShown { get; private set; }
 
     private void Awake()
     {
+        Instance = this;
+
         DefinitionsById = new Dictionary<string, MachineDefinition>();
 
         foreach (var definition in MachineDefinitions)
@@ -71,6 +75,8 @@ public class SaveManager : MonoBehaviour
             // Use roundtrip-ish format so parsing is stable
             SavedAtIsoUtc = DateTime.UtcNow.ToString("o"),
 
+            IntroCompleted = IntroCutscenePlayed,
+
             GridWidth = Grid.width,
             GridHeight = Grid.height,
             Origin = Grid.origin,
@@ -88,8 +94,6 @@ public class SaveManager : MonoBehaviour
             // NEW: containers (filled below)
             Containers = new List<ContainerSave>(),
             TotalSales = TotalSales
-
-
         };
 
         var machineInstances = FindObjectsByType<MachineInstance>(FindObjectsSortMode.None);
@@ -144,13 +148,13 @@ public class SaveManager : MonoBehaviour
             return;
         }
 
-        
-
         ClearAllMachinesAndOccupancy();
 
         var json = File.ReadAllText(SavePath);
         var data = JsonUtility.FromJson<SaveData>(json);
         TotalSales = data.TotalSales;
+        IntroCutscenePlayed = data.IntroCompleted;
+        TutorialShown = data.TutorialShown;
 
         Grid.Clear();
 
@@ -179,8 +183,8 @@ public class SaveManager : MonoBehaviour
                      baseXZ,
                      Quaternion.Euler(0f, rec.FacingIndex * 90f, 0f));
 
-            float placeY = Grid.GetFloorTopY(anchor) + Grid.GetObjectExtentsY(go)
-                ;
+            float placeY = Grid.GetFloorTopY(anchor) + Grid.GetObjectExtentsY(go);
+
             Vector2 center = GetFootprintCenter(def.occupiedOffsets, rec.FacingIndex);
 
             Vector3 worldOffset = new(center.x * Grid.tileSize,
@@ -418,5 +422,17 @@ public class SaveManager : MonoBehaviour
 
         int count = offsets.Length;
         return new Vector2(sumX / count, sumY / count);
+    }
+
+    public void MarkCutsceneAsPlayed()
+    {
+        IntroCutscenePlayed = true;
+        Save();
+    }
+
+    public void MarkTutorialAsShown()
+    {
+        TutorialShown = true;
+        Save();
     }
 }

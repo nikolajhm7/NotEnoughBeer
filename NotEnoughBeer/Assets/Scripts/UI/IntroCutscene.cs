@@ -27,7 +27,7 @@ public class IntroCutscene : MonoBehaviour
 
     void Start()
     {
-        if (!PlayerPrefs.HasKey("IntroCutscenePlayed"))
+        if (!SaveManager.Instance.IntroCutscenePlayed)
         {
             StartCoroutine(PlayCutscene());
         }
@@ -74,8 +74,7 @@ public class IntroCutscene : MonoBehaviour
 
         EndCutscene:
         cutscenePanel.SetActive(false);
-        PlayerPrefs.SetInt("IntroCutscenePlayed", 1);
-        PlayerPrefs.Save();
+        SaveManager.Instance.MarkCutsceneAsPlayed();
         SFXManager.Instance.Stop();
 
         MusicManager.Instance.Play("Main");
