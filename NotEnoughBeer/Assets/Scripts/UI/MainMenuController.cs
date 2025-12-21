@@ -12,6 +12,10 @@ public class MainMenuController : MonoBehaviour
     public Button SaveSlot1;
     public Button SaveSlot2;
     public Button SaveSlot3;
+    public Button DeleteSlot1;
+    public Button DeleteSlot2;
+    public Button DeleteSlot3;
+
 
     public TMP_Text SaveSlot1Label;
     public TMP_Text SaveSlot2Label;
@@ -25,6 +29,10 @@ public class MainMenuController : MonoBehaviour
         if (SaveSlot1) SaveSlot1.onClick.AddListener(() => SelectSlot(1));
         if (SaveSlot2) SaveSlot2.onClick.AddListener(() => SelectSlot(2));
         if (SaveSlot3) SaveSlot3.onClick.AddListener(() => SelectSlot(3));
+
+        if (DeleteSlot1) DeleteSlot1.onClick.AddListener(() => DeleteSlot(1));
+        if (DeleteSlot2) DeleteSlot2.onClick.AddListener(() => DeleteSlot(2));
+        if (DeleteSlot3) DeleteSlot3.onClick.AddListener(() => DeleteSlot(3));
 
         UpdateSlotLabels();
     }
@@ -41,8 +49,22 @@ public class MainMenuController : MonoBehaviour
         if (!label) return;
 
         string path = SaveManager.GetSlotPath(slot);
+        bool exists = File.Exists(path);
 
-        if (!File.Exists(path))
+        Button deleteButton = slot switch
+        {
+            1 => DeleteSlot1,
+            2 => DeleteSlot2,
+            3 => DeleteSlot3,
+            _ => null
+        };
+
+        if (deleteButton)
+        {
+            deleteButton.interactable = exists;
+        }
+
+        if (!exists)
         {
             label.text = $"Slot {slot}: <i>Empty</i>";
             return;
@@ -79,6 +101,19 @@ public class MainMenuController : MonoBehaviour
         UnityEditor.EditorApplication.isPlaying = false;
 
         #endif
+    }
+
+    public void DeleteSlot(int slot)
+    {
+        string path = SaveManager.GetSlotPath(slot);
+
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+            Debug.Log($"[MainMenu] Deleted save slot {slot}");
+        }
+
+        UpdateSlotLabels();
     }
 
     [Serializable]

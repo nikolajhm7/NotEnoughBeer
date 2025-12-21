@@ -49,7 +49,7 @@ public class GridManager : MonoBehaviour
     [ContextMenu("Generate Grid")]
     public void Generate()
     {
-        Clear();
+        var clearState = Clear();
         if (!floorPrefab) { Debug.LogWarning("Assign a Tile prefab."); return; }
         if (!wallPrefab) { Debug.LogError("Assign Wall prefab."); return; }
 
@@ -69,7 +69,7 @@ public class GridManager : MonoBehaviour
         BuildPerimeterWalls();
     }
 
-    public void Clear()
+    public ClearState Clear()
     {
         var floorParent = floorContainer ? floorContainer : transform;
 
@@ -101,12 +101,20 @@ public class GridManager : MonoBehaviour
                 Destroy(w.gameObject);
         }
 
+        var clearState = new ClearState();
+        foreach (var occupiedCell in occupied)
+        {
+            clearState.OccupiedCells[occupiedCell] = true;
+        }
+
         Tiles.Clear();
         occupied.Clear();
         southWalls.Clear(); northWalls.Clear(); westWalls.Clear(); eastWalls.Clear();
 
         interactablesByCell.Clear();
         cellsByInteractable.Clear();
+
+        return clearState;
     }
 
 
@@ -183,14 +191,18 @@ public class GridManager : MonoBehaviour
         int newWidth = width + addRight + addLeft;
         int newHeight = height + addUp + addDown;
 
-        // Shift origin if we add to the left/down
         origin -= new Vector3(addLeft * tileSize, 0f, addDown * tileSize);
 
         width = newWidth;
         height = newHeight;
 
-        Generate();                 // Clear + rebuild floor + walls
-        ReregisterAllInteractables(); // Re-hook computer & machines
+        var clearState = new ClearState
+        {
+            OccupiedCells = occupied.ToDictionary(c => c, c => true)
+        };
+
+        Generate();
+        ReregisterAllInteractables(clearState);
     }
 
 
@@ -220,20 +232,25 @@ public class GridManager : MonoBehaviour
         if (TryGetTile(cell, out var f))
         {
             var r = f.GetComponentInChildren<Renderer>();
-            if (r) return r.bounds.max.y;   // top surface of that floor tile
+            if (r) return r.bounds.max.y;
         }
 
         return 0f;
     }
 
-
-    public void ReregisterAllInteractables()
+    public void ReregisterAllInteractables(ClearState clearState = null)
     {
-        // Reset maps
+        if (clearState != null)
+        {
+            foreach (var kv in clearState.OccupiedCells)
+            {
+                if (kv.Value) occupied.Add(kv.Key);
+            }
+        }
+
         interactablesByCell.Clear();
         cellsByInteractable.Clear();
 
-        // Find every MonoBehaviour that implements IInteractable
         var all = FindObjectsOfType<MonoBehaviour>();
         foreach (var mb in all)
         {
@@ -250,9 +267,6 @@ public class GridManager : MonoBehaviour
         }
     }
 
-
-
-
     public float GetObjectExtentsY(GameObject go)
     {
         var rs = go.GetComponentsInChildren<Renderer>();
@@ -262,7 +276,7 @@ public class GridManager : MonoBehaviour
         var b = rs[0].bounds;
 
         for (int i = 1; i < rs.Length; i++) b.Encapsulate(rs[i].bounds);
-        return b.extents.y;                 // half-height of the machine/ghost
+        return b.extents.y;
     }
 
     #endregion Helpers
@@ -328,4 +342,9 @@ public class GridManager : MonoBehaviour
             Gizmos.DrawLine(GridToWorld(new Vector2Int(x, 0)), GridToWorld(new Vector2Int(x, height)));
     }
 #endif
+}
+
+public class ClearState
+{
+    public Dictionary<Vector2Int, bool> OccupiedCells = new();
 }

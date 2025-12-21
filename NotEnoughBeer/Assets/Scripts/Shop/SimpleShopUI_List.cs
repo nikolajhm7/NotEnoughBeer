@@ -405,7 +405,7 @@ public class SimpleShopUI_List : MonoBehaviour
             return;
         }
 
-        grid.Expand(addRight: 1, addLeft: 1, addUp: 1, addDown: 1);
+        grid.Expand(addRight: 2, addLeft: 0, addUp: 2, addDown: 0);
 
         Toast($"Garage upgraded! New size: {grid.width} x {grid.height} (cost ${cost}).");
 

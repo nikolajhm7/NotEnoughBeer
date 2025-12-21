@@ -1197,8 +1197,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -4870,6 +4870,7 @@ MonoBehaviour:
   InteractionRoot: {fileID: 908550217}
   InteractionText: {fileID: 439165813}
   InteractKey: 20
+  SecondaryKey: 32
   HideInteractionWhenPaused: 1
 --- !u!95 &1820048376
 Animator:
