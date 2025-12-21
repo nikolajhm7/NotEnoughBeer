@@ -67,7 +67,6 @@ public class GridManager : MonoBehaviour
         }
 
         BuildPerimeterWalls();
-        ReregisterAllInteractables(clearState);
     }
 
     public ClearState Clear()
@@ -197,8 +196,13 @@ public class GridManager : MonoBehaviour
         width = newWidth;
         height = newHeight;
 
+        var clearState = new ClearState
+        {
+            OccupiedCells = occupied.ToDictionary(c => c, c => true)
+        };
+
         Generate();
-        //ReregisterAllInteractables();
+        ReregisterAllInteractables(clearState);
     }
 
 
