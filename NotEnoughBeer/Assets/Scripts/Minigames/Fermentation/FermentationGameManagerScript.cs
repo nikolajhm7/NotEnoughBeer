@@ -5,7 +5,7 @@ public class FermentationGameManager : MonoBehaviour
 {
     [Header("Game Settings")]
     [SerializeField] private float gameDuration = 30f;
-    [SerializeField] private float countdownDuration = 3f; // 3-2-1-GO countdown
+    [SerializeField] private float countdownDuration = 3f;
     
     [Header("Game State")]
     [SerializeField] private bool gameIsActive = false;
@@ -28,11 +28,10 @@ public class FermentationGameManager : MonoBehaviour
     public UnityEvent OnGameStart;
     public UnityEvent OnGameEnd;
     public UnityEvent OnCountdownStart;
-    public UnityEvent<int> OnCountdownTick; // Passes countdown number (3, 2, 1, 0 for GO)
+    public UnityEvent<int> OnCountdownTick;
     
     public static FermentationGameManager Instance;
     
-    // Public properties
     public bool GameIsActive => gameIsActive;
     public bool GameIsStarted => gameIsStarted;
     public float CurrentGameTime => currentGameTime;
@@ -48,7 +47,6 @@ public class FermentationGameManager : MonoBehaviour
 
     private void Start()
     {
-        // Auto-find script references if not assigned
         if (fermentationUI == null)
             fermentationUI = FindFirstObjectByType<FermentationUI>();
             
@@ -78,7 +76,6 @@ public class FermentationGameManager : MonoBehaviour
     {
         countdownTime -= Time.deltaTime;
         
-        // Check for countdown ticks
         int currentTick = Mathf.CeilToInt(countdownTime);
         if (currentTick <= 3 && currentTick >= 0)
         {
@@ -87,7 +84,6 @@ public class FermentationGameManager : MonoBehaviour
         
         if (countdownTime <= 0f)
         {
-            // Countdown finished, start the game
             isCountingDown = false;
             StartGame();
         }
@@ -105,14 +101,12 @@ public class FermentationGameManager : MonoBehaviour
 
     public void StartCountdown()
     {
-        if (gameIsStarted) return; // Prevent multiple starts
+        if (gameIsStarted) return;
         
         Debug.Log("Starting countdown...");
         
-        // Reset game state
         ResetGame();
         
-        // Start countdown
         isCountingDown = true;
         countdownTime = countdownDuration;
         gameIsStarted = true;
@@ -133,13 +127,12 @@ public class FermentationGameManager : MonoBehaviour
 
     public void EndGame()
     {
-        if (!gameIsActive) return; // Already ended
+        if (!gameIsActive) return;
         
         Debug.Log("Game ended!");
         
         gameIsActive = false;
         
-        // Log final scores
         float greenScore = greenSectionScript != null ? greenSectionScript.GreenSectionCount : 0f;
         float redScore = ringScript != null ? ringScript.RedRingCount : 0f;
         float greenPercentage = greenSectionScript != null ? greenSectionScript.GreenPercentage : 0f;
@@ -162,14 +155,12 @@ public class FermentationGameManager : MonoBehaviour
     {
         Debug.Log("Resetting game...");
         
-        // Reset game state
         gameIsActive = false;
         gameIsStarted = false;
         currentGameTime = 0f;
         countdownTime = 0f;
         isCountingDown = false;
         
-        // Reset all counters
         if (greenSectionScript != null)
             greenSectionScript.ResetCounter();
             
@@ -185,7 +176,6 @@ public class FermentationGameManager : MonoBehaviour
         }
     }
 
-    // UI Button methods
     public void OnStartButtonPressed()
     {
         if (!gameIsStarted)
@@ -225,7 +215,6 @@ public class FermentationGameManager : MonoBehaviour
         }
     }
 
-    // Helper methods for other scripts to check game state
     public bool CanCountScore()
     {
         return gameIsActive && !isCountingDown;
@@ -233,6 +222,6 @@ public class FermentationGameManager : MonoBehaviour
 
     public bool CanMoveNeedle()
     {
-        return gameIsActive || isCountingDown; // Allow movement during countdown and game
+        return gameIsActive || isCountingDown;
     }
 }

@@ -28,7 +28,6 @@ public class SpoonStirrer : MonoBehaviour
     
     void Start()
     {
-        // Store the initial position and rotation as the center point
         centerPosition = transform.localPosition;
         centerRotation = transform.localRotation;
     }
@@ -37,17 +36,14 @@ public class SpoonStirrer : MonoBehaviour
     {
         if (isStirring)
         {
-            // Smoothly accelerate to full speed
             currentSpeed = Mathf.Lerp(currentSpeed, stirSpeed, Time.deltaTime / accelerationTime);
             
-            // Update stir angle
             stirAngle += currentSpeed * 360f * Time.deltaTime;
             if (stirAngle >= 360f)
             {
                 stirAngle -= 360f;
             }
             
-            // Calculate circular motion
             float radians = stirAngle * Mathf.Deg2Rad;
             Vector3 offset = new Vector3(
                 Mathf.Cos(radians) * stirRadius,
@@ -55,10 +51,8 @@ public class SpoonStirrer : MonoBehaviour
                 Mathf.Sin(radians) * stirRadius
             );
             
-            // Apply position
             transform.localPosition = centerPosition + offset;
             
-            // Apply rotation with tilt
             float tiltX = Mathf.Sin(radians) * tiltAngle;
             float tiltZ = -Mathf.Cos(radians) * tiltAngle;
             Quaternion tilt = Quaternion.Euler(tiltX, 0f, tiltZ);
@@ -66,12 +60,10 @@ public class SpoonStirrer : MonoBehaviour
         }
         else
         {
-            // Smoothly decelerate and return to center
             currentSpeed = Mathf.Lerp(currentSpeed, 0f, Time.deltaTime / accelerationTime);
             
             if (currentSpeed > 0.01f)
             {
-                // Continue moving in circle but slowing down
                 stirAngle += currentSpeed * 360f * Time.deltaTime;
                 float radians = stirAngle * Mathf.Deg2Rad;
                 Vector3 offset = new Vector3(
@@ -88,34 +80,25 @@ public class SpoonStirrer : MonoBehaviour
             }
             else
             {
-                // Return to rest position
                 transform.localPosition = Vector3.Lerp(transform.localPosition, centerPosition, Time.deltaTime * 5f);
                 transform.localRotation = Quaternion.Lerp(transform.localRotation, centerRotation, Time.deltaTime * 5f);
             }
         }
     }
     
-    /// <summary>
-    /// Start stirring the spoon
-    /// </summary>
+
     public void StartStirring()
     {
         isStirring = true;
         Debug.Log("Started stirring");
     }
     
-    /// <summary>
-    /// Stop stirring the spoon
-    /// </summary>
     public void StopStirring()
     {
         isStirring = false;
         Debug.Log("Stopped stirring");
     }
-    
-    /// <summary>
-    /// Check if currently stirring
-    /// </summary>
+
     public bool IsStirring()
     {
         return isStirring;

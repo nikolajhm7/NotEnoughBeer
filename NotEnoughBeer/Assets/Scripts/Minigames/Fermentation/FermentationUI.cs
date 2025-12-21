@@ -15,8 +15,8 @@ public class FermentationUI : MonoBehaviour
     [SerializeField] private Button startButton;
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TextMeshProUGUI finalScoreText;
-    [SerializeField] private GameObject startScreen; // Start screen overlay
-    [SerializeField] private GameObject endScreen; // End screen overlay
+    [SerializeField] private GameObject startScreen;
+    [SerializeField] private GameObject endScreen;
     
     [Header("Script References")]
     [SerializeField] private GreenSectionScript greenSectionScript;
@@ -39,7 +39,6 @@ public class FermentationUI : MonoBehaviour
 
     private void Start()
     {
-        // Auto-find scripts if not assigned
         if (greenSectionScript == null)
             greenSectionScript = FindFirstObjectByType<GreenSectionScript>();
             
@@ -49,7 +48,6 @@ public class FermentationUI : MonoBehaviour
         if (gameManager == null)
             gameManager = FindFirstObjectByType<FermentationGameManager>();
             
-        // Subscribe to game manager events
         if (gameManager != null)
         {
             gameManager.OnCountdownStart.AddListener(OnCountdownStart);
@@ -58,7 +56,6 @@ public class FermentationUI : MonoBehaviour
             gameManager.OnCountdownTick.AddListener(OnCountdownTick);
         }
         
-        // Setup initial UI state
         SetupInitialUI();
     }
 
@@ -70,14 +67,12 @@ public class FermentationUI : MonoBehaviour
 
     private void SetupInitialUI()
     {
-        // Show start button
         if (startButton != null)
             startButton.gameObject.SetActive(true);
             
         if (countdownText != null)
             countdownText.gameObject.SetActive(false);
             
-        // Show start screen initially, hide end screen
         if (startScreen != null)
             startScreen.SetActive(true);
             
@@ -87,21 +82,18 @@ public class FermentationUI : MonoBehaviour
 
     private void UpdateCounterDisplays()
     {
-        // Update green counter display
         if (greenCounterText != null && greenSectionScript != null)
         {
             float greenCount = greenSectionScript.GreenSectionCount;
             greenCounterText.text = $"{greenPrefix}{greenCount.ToString($"F{decimalPlaces}")}";
         }
         
-        // Update red counter display
         if (redCounterText != null && ringScript != null)
         {
             float redCount = ringScript.RedRingCount;
             redCounterText.text = $"{redPrefix}{redCount.ToString($"F{decimalPlaces}")}";
         }
         
-        // Update green percentage display
         if (greenPercentageText != null && greenSectionScript != null)
         {
             float greenPercentage = greenSectionScript.GreenPercentage;
@@ -115,7 +107,6 @@ public class FermentationUI : MonoBehaviour
         {
             if (gameManager.IsCountingDown)
             {
-                // Don't show timer during countdown
                 timerText.text = "";
             }
             else if (gameManager.GameIsActive)
@@ -125,13 +116,11 @@ public class FermentationUI : MonoBehaviour
             }
             else
             {
-                // Show full time when not active
                 timerText.text = $"{timerPrefix}{gameManager.GameDuration.ToString("F0")}s";
             }
         }
     }
 
-    // Event handlers for game manager events
     private void OnCountdownStart()
     {
         Debug.Log("OnCountdownStart called - hiding start screen");
@@ -142,7 +131,6 @@ public class FermentationUI : MonoBehaviour
         if (countdownText != null)
             countdownText.gameObject.SetActive(true);
             
-        // Hide start screen when countdown starts (reveals minigame)
         if (startScreen != null)
         {
             Debug.Log("Start screen found, setting it to inactive");
@@ -164,7 +152,6 @@ public class FermentationUI : MonoBehaviour
     {
         Debug.Log("Game ended - showing end screen and final scores");
         
-        // Show end screen
         if (endScreen != null)
             endScreen.SetActive(true);
         else
@@ -173,7 +160,6 @@ public class FermentationUI : MonoBehaviour
         if (startButton != null)
             startButton.gameObject.SetActive(true);
             
-        // Update final score text with only green accuracy percentage
         if (finalScoreText != null)
         {
             float greenPercentage = greenSectionScript != null ? greenSectionScript.GreenPercentage : 0f;
@@ -204,7 +190,6 @@ public class FermentationUI : MonoBehaviour
         }
     }
 
-    // Performance rating based on green percentage
     private string GetPerformanceRating(float greenPercentage)
     {
         if (greenPercentage >= 90f)
@@ -221,25 +206,20 @@ public class FermentationUI : MonoBehaviour
             return "KEEP PRACTICING! ";
     }
 
-    /// <summary>
-    /// Manually update the displays (useful for when values change infrequently)
-    /// </summary>
+
     public void RefreshDisplays()
     {
         UpdateCounterDisplays();
         UpdateTimerDisplay();
     }
 
-    /// <summary>
-    /// Reset all counters to zero (call this when starting a new game)
-    /// </summary>
+
     public void ResetCounters()
     {
         if (gameManager != null)
             gameManager.ResetGame();
         else
         {
-            // Fallback if no game manager
             if (greenSectionScript != null)
                 greenSectionScript.ResetCounter();
                 
@@ -250,16 +230,13 @@ public class FermentationUI : MonoBehaviour
         UpdateCounterDisplays();
         UpdateTimerDisplay();
         
-        // Show start screen again when resetting
         if (startScreen != null)
             startScreen.SetActive(true);
             
-        // Hide end screen when resetting
         if (endScreen != null)
             endScreen.SetActive(false);
     }
 
-    // Button event handlers
     public void OnStartButtonClicked()
     {
         Debug.Log("Start button clicked!");
@@ -276,7 +253,6 @@ public class FermentationUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Unsubscribe from events to prevent memory leaks
         if (gameManager != null)
         {
             gameManager.OnCountdownStart.RemoveListener(OnCountdownStart);

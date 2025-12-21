@@ -16,13 +16,11 @@ public class StirZone : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     
     void Start()
     {
-        // Try to find spoon if not assigned
         if (spoon == null)
         {
             spoon = FindAnyObjectByType<SpoonStirrer>();
         }
         
-        // Get image component for visual feedback
         imageComponent = GetComponent<UnityEngine.UI.Image>();
         if (imageComponent != null)
         {
@@ -32,13 +30,11 @@ public class StirZone : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     
     public void OnPointerDown(PointerEventData eventData)
     {
-        // Start stirring when clicked
         if (spoon != null)
         {
             spoon.StartStirring();
         }
         
-        // Visual feedback
         if (imageComponent != null)
         {
             imageComponent.color = highlightColor;
@@ -47,13 +43,11 @@ public class StirZone : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     
     public void OnPointerUp(PointerEventData eventData)
     {
-        // Stop stirring when released
         if (spoon != null)
         {
             spoon.StopStirring();
         }
         
-        // Remove visual feedback
         if (imageComponent != null)
         {
             imageComponent.color = originalColor;

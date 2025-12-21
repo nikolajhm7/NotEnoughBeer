@@ -59,13 +59,11 @@ public class Thermometer : MonoBehaviour
     
     void Start()
     {
-        // Position indicators at correct positions on the thermometer
         PositionIndicators();
     }
     
     void Update()
     {
-        // Update temperature based on current change rate
         if (currentChangeRate != 0f)
         {
             currentTemperature += currentChangeRate * Time.deltaTime;
@@ -75,14 +73,11 @@ public class Thermometer : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Called when the log count changes to update the temperature change rate
-    /// </summary>
+
     public void OnLogCountChanged(int logCount)
     {
         currentLogCount = logCount;
         
-        // Determine the temperature change rate based on log count
         switch (logCount)
         {
             case 0:
@@ -116,97 +111,69 @@ public class Thermometer : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Updates all UI elements to display current temperature
-    /// </summary>
     private void UpdateUI()
     {
-        // Update slider
         if (temperatureSlider != null)
         {
             temperatureSlider.value = currentTemperature / maxTemperature;
         }
         
-        // Update text
         if (temperatureText != null)
         {
             temperatureText.text = $"{Mathf.RoundToInt(currentTemperature)}°";
         }
         
-        // Update fill image
         if (temperatureFill != null)
         {
             temperatureFill.fillAmount = currentTemperature / maxTemperature;
         }
     }
     
-    /// <summary>
-    /// Manually set the temperature
-    /// </summary>
     public void SetTemperature(float temperature)
     {
         currentTemperature = Mathf.Clamp(temperature, minTemperature, maxTemperature);
         UpdateUI();
     }
     
-    /// <summary>
-    /// Increase temperature by a specific amount
-    /// </summary>
     public void IncreaseTemperature(float amount)
     {
         currentTemperature = Mathf.Clamp(currentTemperature + amount, minTemperature, maxTemperature);
         UpdateUI();
     }
     
-    /// <summary>
-    /// Decrease temperature by a specific amount
-    /// </summary>
     public void DecreaseTemperature(float amount)
     {
         currentTemperature = Mathf.Clamp(currentTemperature - amount, minTemperature, maxTemperature);
         UpdateUI();
     }
-    
-    /// <summary>
-    /// Check if temperature is at maximum
-    /// </summary>
+
     public bool IsAtMaxTemperature()
     {
         return currentTemperature >= maxTemperature;
     }
     
-    /// <summary>
-    /// Check if temperature is at minimum
-    /// </summary>
     public bool IsAtMinTemperature()
     {
         return currentTemperature <= minTemperature;
     }
     
-    /// <summary>
-    /// Get temperature as a percentage (0-1)
-    /// </summary>
+
     public float GetTemperaturePercentage()
     {
         return currentTemperature / maxTemperature;
     }
     
-    /// <summary>
-    /// Reset temperature to a specific value
-    /// </summary>
+
     public void ResetTemperature(float temperature = 0f)
     {
         SetTemperature(temperature);
     }
     
-    /// <summary>
-    /// Position the temperature range indicators at 60 and 75 degrees
-    /// </summary>
+
     private void PositionIndicators()
     {
         if (temperatureSlider == null) return;
         
-        // Get the slider's fill rect (the area that actually fills)
         RectTransform fillRect = temperatureSlider.fillRect;
         if (fillRect == null)
         {
@@ -214,39 +181,32 @@ public class Thermometer : MonoBehaviour
             return;
         }
         
-        // Position 60 degree indicator (60% of 100 degrees)
         if (indicator60Degrees != null)
         {
-            float position60 = 60f / maxTemperature; // 0.6
+            float position60 = 60f / maxTemperature;
             PositionIndicatorOnSlider(indicator60Degrees, position60, fillRect);
         }
         
-        // Position 75 degree indicator (75% of 100 degrees)
         if (indicator75Degrees != null)
         {
-            float position75 = 75f / maxTemperature; // 0.75
+            float position75 = 75f / maxTemperature;
             PositionIndicatorOnSlider(indicator75Degrees, position75, fillRect);
         }
     }
     
-    /// <summary>
-    /// Helper method to position an indicator on the slider (vertical)
-    /// </summary>
+
     private void PositionIndicatorOnSlider(RectTransform indicator, float normalizedPosition, RectTransform fillRect)
     {
-        // For vertical slider - anchor to center horizontally, bottom vertically
         indicator.anchorMin = new Vector2(0.5f, 0);
         indicator.anchorMax = new Vector2(0.5f, 0);
         indicator.pivot = new Vector2(0.5f, 0.5f);
         
-        // Calculate the height of the fill area
         RectTransform parent = fillRect.parent as RectTransform;
         if (parent != null)
         {
             float fillAreaHeight = parent.rect.height;
             float yPosition = fillAreaHeight * normalizedPosition;
             
-            // Set position (Y axis for vertical slider)
             indicator.anchoredPosition = new Vector2(0, yPosition);
         }
     }

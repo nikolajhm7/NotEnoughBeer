@@ -36,19 +36,16 @@ public class LogPileGrabberUI : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
         mainCamera = Camera.main;
         
-        // Try to find canvas if not assigned
         if (canvas == null)
         {
             canvas = GetComponentInParent<Canvas>();
         }
         
-        // Try to find fire drop zone
         if (fireDropZone == null)
         {
             fireDropZone = FindObjectOfType<FireDropZone>();
         }
         
-        // Try to find log pile cycler
         if (logPileCycler == null)
         {
             logPileCycler = FindObjectOfType<LogPileCycler>();
@@ -57,13 +54,11 @@ public class LogPileGrabberUI : MonoBehaviour, IPointerDownHandler, IDragHandler
     
     public void OnPointerDown(PointerEventData eventData)
     {
-        // Don't allow new drag if already dragging
         if (isDragging)
         {
             return;
         }
         
-        // Clean up any existing log first
         if (currentLog != null)
         {
             Destroy(currentLog);
@@ -72,24 +67,19 @@ public class LogPileGrabberUI : MonoBehaviour, IPointerDownHandler, IDragHandler
             currentLogCanvasGroup = null;
         }
         
-        // Create a log when clicking on the pile
         if (logPrefab != null && canvas != null)
         {
-            // Instantiate the log
             currentLog = Instantiate(logPrefab, canvas.transform);
             currentLogRect = currentLog.GetComponent<RectTransform>();
             
-            // Add canvas group for alpha control
             currentLogCanvasGroup = currentLog.GetComponent<CanvasGroup>();
             if (currentLogCanvasGroup == null)
             {
                 currentLogCanvasGroup = currentLog.AddComponent<CanvasGroup>();
             }
             
-            // Set position to pointer
             UpdateLogPosition(eventData);
             
-            // Set visual properties
             currentLog.transform.localScale = Vector3.one * logScale;
             currentLogCanvasGroup.alpha = logAlpha;
             currentLogCanvasGroup.blocksRaycasts = false;
@@ -115,13 +105,11 @@ public class LogPileGrabberUI : MonoBehaviour, IPointerDownHandler, IDragHandler
             return;
         }
         
-        // Check if dropped over the fire
         bool droppedOnFire = IsPointerOverFire(eventData);
         int logsBefore = logPileCycler?.GetCurrentLogCount() ?? 0;
         
         if (droppedOnFire && logPileCycler != null && logPileCycler.GetCurrentLogCount() < 5)
         {
-            // Add log to fire (only adds one)
             logPileCycler.AddOneLog();
             logPileCycler.ResetDecayTimer();
             int logsAfter = logPileCycler.GetCurrentLogCount();
@@ -136,7 +124,6 @@ public class LogPileGrabberUI : MonoBehaviour, IPointerDownHandler, IDragHandler
             Debug.Log($"Missed the fire! Fire has {logsBefore} logs");
         }
         
-        // Clean up
         isDragging = false;
         if (currentLog != null)
         {
@@ -169,7 +156,6 @@ public class LogPileGrabberUI : MonoBehaviour, IPointerDownHandler, IDragHandler
             return false;
         }
         
-        // Check if pointer is over the fire drop zone
         return RectTransformUtility.RectangleContainsScreenPoint(
             fireDropZone.GetComponent<RectTransform>(),
             eventData.position,

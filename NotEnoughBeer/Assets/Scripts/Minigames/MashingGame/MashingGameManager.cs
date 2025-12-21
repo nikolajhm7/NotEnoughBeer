@@ -57,7 +57,6 @@ public class MashingGameManager : MonoBehaviour
     private bool _ending = false;
 
 
-    // ✅ Prevent double-finishing (timer end + button click, etc.)
     private bool _resultSent = false;
 
     private enum GameState
@@ -70,7 +69,6 @@ public class MashingGameManager : MonoBehaviour
 
     void Start()
     {
-        // Try to find references if not assigned
         if (gameScorer == null)
         {
             gameScorer = FindAnyObjectByType<MashingGameScorer>();
@@ -95,7 +93,6 @@ public class MashingGameManager : MonoBehaviour
         {
             gameTimer += Time.deltaTime;
 
-            // Update timer display
             if (timerText != null)
             {
                 float timeRemaining = Mathf.Max(0, gameDuration - gameTimer);
@@ -109,9 +106,6 @@ public class MashingGameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Called when Start button is clicked
-    /// </summary>
     public void OnStartButtonClicked()
     {
         StartCoroutine(StartGameSequence());
@@ -168,7 +162,7 @@ public class MashingGameManager : MonoBehaviour
         if (logPileCycler != null)
         {
             logPileCycler.enabled = true;
-            logPileCycler.currentPileIndex = 4; // reset to 4 logs (your default)
+            logPileCycler.currentPileIndex = 4;
         }
 
         if (thermometer != null)
@@ -178,30 +172,20 @@ public class MashingGameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Called when How To Play button is clicked
-    /// </summary>
     public void OnHowToPlayButtonClicked()
     {
         if (startPanel != null) startPanel.SetActive(false);
         if (howToPlayPanel != null) howToPlayPanel.SetActive(true);
     }
 
-    /// <summary>
-    /// Called when Back button is clicked on how to play screen
-    /// </summary>
     public void OnBackButtonClicked()
     {
         if (howToPlayPanel != null) howToPlayPanel.SetActive(false);
         if (startPanel != null) startPanel.SetActive(true);
     }
 
-    /// <summary>
-    /// Called when Continue button is clicked on end screen
-    /// </summary>
     public void OnContinueButtonClicked()
     {
-        // If we reached the end screen, continue means "finish and return"
         if (currentState == GameState.End)
         {
             EndGame();
@@ -211,9 +195,6 @@ public class MashingGameManager : MonoBehaviour
         ShowStartScreen();
     }
 
-    /// <summary>
-    /// Show the start screen
-    /// </summary>
     private void ShowStartScreen()
     {
         currentState = GameState.Start;
@@ -227,7 +208,6 @@ public class MashingGameManager : MonoBehaviour
         if (gamePanel != null) gamePanel.SetActive(false);
         if (endPanel != null) endPanel.SetActive(false);
 
-        // Disable game components
         if (gameScorer != null) gameScorer.enabled = false;
         if (logPileCycler != null) logPileCycler.enabled = false;
         if (thermometer != null) thermometer.enabled = false;
@@ -242,11 +222,6 @@ public class MashingGameManager : MonoBehaviour
         if (gameScorer != null)
             score = Mathf.Clamp(gameScorer.GetScore(), 0f, 100f);
 
-        // Optional: show countdown on end screen if you want
-        // Example:
-        // if (finalScoreText != null)
-        //     finalScoreText.text += $"\nReturning in {endScreenDelay:0}s...";
-
         yield return new WaitForSeconds(endScreenDelay);
 
         if (!_resultSent)
@@ -260,37 +235,28 @@ public class MashingGameManager : MonoBehaviour
         }
     }
 
-
-    /// <summary>
-    /// End the game and show results (AND return to main scene like other minigames)
-    /// </summary>
     public void EndGame()
     {
-        if (_ending) return;        // prevent double trigger
+        if (_ending) return;
         _ending = true;
 
         currentState = GameState.End;
 
-        // Hide game UI, show end screen
         if (gamePanel != null) gamePanel.SetActive(false);
         if (endPanel != null) endPanel.SetActive(true);
 
-        // Disable game components
         if (gameScorer != null) gameScorer.enabled = false;
         if (logPileCycler != null) logPileCycler.enabled = false;
 
-        // Display final score
         if (finalScoreText != null && gameScorer != null)
             finalScoreText.text = $"Final Score: {gameScorer.GetScoreInt()}";
 
-        // Reset log pile to 4 logs
         if (logPileCycler != null)
         {
             logPileCycler.currentPileIndex = 4;
             logPileCycler.enabled = false;
         }
 
-        // Reset thermometer to 60 degrees
         if (thermometer != null)
         {
             thermometer.SetTemperature(60f);
@@ -299,7 +265,6 @@ public class MashingGameManager : MonoBehaviour
 
         gameTimer = 0f;
 
-        // Start delayed finish
         if (_endRoutine != null) StopCoroutine(_endRoutine);
         _endRoutine = StartCoroutine(DelayedFinishRoutine());
     }

@@ -9,20 +9,19 @@ public class RingScript : MonoBehaviour
     [SerializeField] private Material ringMaterial;
     
     [Header("Ring Detection")]
-    [SerializeField] private float ringStartAngle = 50f; // Start angle of the red ring
-    [SerializeField] private float ringEndAngle = 300f;   // End angle of the red ring
+    [SerializeField] private float ringStartAngle = 50f;
+    [SerializeField] private float ringEndAngle = 300f;
     
     [Header("Counters")]
     [SerializeField] private float redRingCount = 0f;
-    [SerializeField] private float countIncrement = 2f; // Same as green section for fair comparison
-    [SerializeField] private bool showDebugInfo = false; // Toggle debug messages
+    [SerializeField] private float countIncrement = 2f;
+    [SerializeField] private bool showDebugInfo = false;
     
-    // Public property to expose the counter value for UI
     public float RedRingCount => redRingCount;
     
     [Header("Needle Reference")]
     [SerializeField] private NeedleScript needleScript;
-    [SerializeField] private GreenSectionScript greenSectionScript; // Reference to green section
+    [SerializeField] private GreenSectionScript greenSectionScript;
     [SerializeField] private FermentationGameManager gameManager;
 
     private float lastOuterRadius;
@@ -32,20 +31,16 @@ public class RingScript : MonoBehaviour
 
     void Start()
     {
-        // Auto-find needle if not assigned
         if (needleScript == null)
             needleScript = FindFirstObjectByType<NeedleScript>();
             
-        // Auto-find green section if not assigned
         if (greenSectionScript == null)
             greenSectionScript = FindFirstObjectByType<GreenSectionScript>();
             
-        // Auto-find game manager if not assigned
         if (gameManager == null)
             gameManager = FindFirstObjectByType<FermentationGameManager>();
             
         CreateRing();
-        // Store initial values
         lastOuterRadius = outerRadius;
         lastInnerRadius = innerRadius;
         lastSegments = segments;
@@ -53,7 +48,6 @@ public class RingScript : MonoBehaviour
 
     void Update()
     {
-        // Check if values have changed
         if (outerRadius != lastOuterRadius || innerRadius != lastInnerRadius || segments != lastSegments)
         {
             CreateRing();
@@ -62,10 +56,8 @@ public class RingScript : MonoBehaviour
             lastSegments = segments;
         }
         
-        // Check needle collision with ring
         if (needleScript != null)
         {
-            // Only check collision and count score if game is active
             bool canCountScore = gameManager == null || gameManager.CanCountScore();
             if (canCountScore)
             {
@@ -78,17 +70,14 @@ public class RingScript : MonoBehaviour
     {
         float needleAngle = needleScript.currentAngle;
         
-        // Check if needle is within the red ring angle range
         bool inRedRing = IsAngleInRange(needleAngle, ringStartAngle, ringEndAngle);
         
-        // Check if needle is in green section (green takes priority and excludes red counting)
         bool inGreenSection = false;
         if (greenSectionScript != null)
         {
             inGreenSection = greenSectionScript.IsNeedleInGreenSection(needleAngle);
         }
         
-        // Only increment red ring counter if in red ring AND NOT in green section
         if (inRedRing && !inGreenSection)
         {
             redRingCount += countIncrement * Time.deltaTime;
@@ -116,12 +105,10 @@ public class RingScript : MonoBehaviour
     
     bool IsAngleInRange(float angle, float startAngle, float endAngle)
     {
-        // Normalize angles to 0-360 range
         angle = NormalizeAngle(angle);
         startAngle = NormalizeAngle(startAngle);
         endAngle = NormalizeAngle(endAngle);
         
-        // Handle wrap-around case (e.g., 350° to 10°)
         if (startAngle > endAngle)
         {
             return angle >= startAngle || angle <= endAngle;
@@ -141,7 +128,6 @@ public class RingScript : MonoBehaviour
 
     void OnValidate()
     {
-        // This runs when values change in the Inspector (even in edit mode)
         if (Application.isPlaying && lineRenderer != null)
         {
             CreateRing();
@@ -150,14 +136,11 @@ public class RingScript : MonoBehaviour
 
     void CreateRing()
     {
-        // Setup LineRenderer
         if (lineRenderer == null)
             lineRenderer = gameObject.AddComponent<LineRenderer>();
         
-        // Use default material if none assigned
         if (ringMaterial == null)
         {
-            // Create a simple default material
             ringMaterial = new Material(Shader.Find("Sprites/Default"));
             ringMaterial.color = Color.red;
         }
@@ -169,10 +152,8 @@ public class RingScript : MonoBehaviour
         lineRenderer.useWorldSpace = false;
         lineRenderer.loop = true;
         
-        // Hide the red ring visually (still tracks in background)
         lineRenderer.enabled = false;
 
-        // Generate ring points
         for (int i = 0; i <= segments; i++)
         {
             float angle = (float)i / segments * 2f * Mathf.PI;
@@ -182,7 +163,6 @@ public class RingScript : MonoBehaviour
         }
     }
 
-    // Public methods to access counters and control from other scripts
     public float GetRedRingCount()
     {
         return redRingCount;
@@ -206,7 +186,6 @@ public class RingScript : MonoBehaviour
             greenSectionScript.ResetGreenSectionCount();
     }
     
-    // Alias method for UI compatibility
     public void ResetCounter()
     {
         redRingCount = 0f;

@@ -33,19 +33,16 @@ public class LogPileGrabber : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     
     void Start()
     {
-        // Try to find canvas if not assigned
         if (canvas == null)
         {
             canvas = GetComponentInParent<Canvas>();
         }
         
-        // Try to find fire drop zone
         if (fireDropZone == null)
         {
             fireDropZone = FindObjectOfType<FireDropZone>();
         }
         
-        // Try to find log pile cycler
         if (logPileCycler == null)
         {
             logPileCycler = FindObjectOfType<LogPileCycler>();
@@ -54,21 +51,17 @@ public class LogPileGrabber : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     
     public void OnPointerDown(PointerEventData eventData)
     {
-        // Create a log when clicking on the pile
         if (logPrefab != null && canvas != null)
         {
-            // Instantiate the log
             currentLog = Instantiate(logPrefab, canvas.transform);
             currentLogRect = currentLog.GetComponent<RectTransform>();
             
-            // Add canvas group for alpha control
             currentLogCanvasGroup = currentLog.GetComponent<CanvasGroup>();
             if (currentLogCanvasGroup == null)
             {
                 currentLogCanvasGroup = currentLog.AddComponent<CanvasGroup>();
             }
             
-            // Set position to pointer
             Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 canvas.transform as RectTransform,
@@ -78,7 +71,6 @@ public class LogPileGrabber : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             );
             currentLogRect.anchoredPosition = localPoint;
             
-            // Set visual properties
             currentLog.transform.localScale = Vector3.one * logScale;
             currentLogCanvasGroup.alpha = logAlpha;
             currentLogCanvasGroup.blocksRaycasts = false;
@@ -92,7 +84,6 @@ public class LogPileGrabber : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         if (isDragging && currentLog != null && currentLogRect != null)
         {
-            // Move log with pointer
             Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 canvas.transform as RectTransform,
@@ -113,12 +104,10 @@ public class LogPileGrabber : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         
         isDragging = false;
         
-        // Check if dropped over the fire
         bool droppedOnFire = IsPointerOverFire(eventData);
         
         if (droppedOnFire && logPileCycler != null)
         {
-            // Add log to fire
             logPileCycler.AddOneLog();
             logPileCycler.ResetDecayTimer();
             Debug.Log("Log added to fire!");
@@ -128,7 +117,6 @@ public class LogPileGrabber : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             Debug.Log("Missed the fire!");
         }
         
-        // Destroy the dragged log
         Destroy(currentLog);
         currentLog = null;
         currentLogRect = null;
@@ -142,7 +130,6 @@ public class LogPileGrabber : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             return false;
         }
         
-        // Check if pointer is over the fire drop zone
         return RectTransformUtility.RectangleContainsScreenPoint(
             fireDropZone.GetComponent<RectTransform>(),
             eventData.position,

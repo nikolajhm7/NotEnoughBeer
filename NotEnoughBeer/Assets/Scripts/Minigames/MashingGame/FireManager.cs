@@ -32,19 +32,16 @@ public class FireManager : MonoBehaviour
     
     void Start()
     {
-        // Try to find LogPileCycler if not assigned
         if (logPileCycler == null)
         {
             logPileCycler = FindObjectOfType<LogPileCycler>();
         }
         
-        // Try to find Thermometer if not assigned
         if (thermometer == null)
         {
             thermometer = FindObjectOfType<Thermometer>();
         }
         
-        // Initial update
         if (logPileCycler != null)
         {
             UpdateFiresBasedOnLogs(logPileCycler.GetCurrentLogCount());
@@ -53,7 +50,6 @@ public class FireManager : MonoBehaviour
     
     void Update()
     {
-        // Auto-update fires when log count changes
         if (logPileCycler != null)
         {
             int currentLogCount = logPileCycler.GetCurrentLogCount();
@@ -65,12 +61,9 @@ public class FireManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Enable/disable fire objects based on the number of logs
-    /// </summary>
     public void UpdateFiresBasedOnLogs(int logCount)
     {
-        currentLogCount = logCount; // Store for debugging
+        currentLogCount = logCount;
         
         if (fireObjects == null || fireObjects.Length == 0)
         {
@@ -78,7 +71,6 @@ public class FireManager : MonoBehaviour
             return;
         }
         
-        // Determine how many fires should be active
         int activeFireCount = 0;
         
         if (logCount >= logsForThirdFire && fireObjects.Length >= 3)
@@ -101,7 +93,6 @@ public class FireManager : MonoBehaviour
             Debug.Log($"No fires active (log count: {logCount})");
         }
         
-        // Enable/disable fires
         for (int i = 0; i < fireObjects.Length; i++)
         {
             if (fireObjects[i] != null)
@@ -110,16 +101,12 @@ public class FireManager : MonoBehaviour
             }
         }
         
-        // Notify thermometer of log count change
         if (thermometer != null)
         {
             thermometer.OnLogCountChanged(logCount);
         }
     }
     
-    /// <summary>
-    /// Manually set the number of active fires
-    /// </summary>
     public void SetActiveFireCount(int count)
     {
         if (fireObjects == null || fireObjects.Length == 0)
@@ -138,25 +125,16 @@ public class FireManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Enable all fires
-    /// </summary>
     public void EnableAllFires()
     {
         SetActiveFireCount(fireObjects.Length);
     }
     
-    /// <summary>
-    /// Disable all fires
-    /// </summary>
     public void DisableAllFires()
     {
         SetActiveFireCount(0);
     }
     
-    /// <summary>
-    /// Get the number of currently active fires
-    /// </summary>
     public int GetActiveFireCount()
     {
         if (fireObjects == null)

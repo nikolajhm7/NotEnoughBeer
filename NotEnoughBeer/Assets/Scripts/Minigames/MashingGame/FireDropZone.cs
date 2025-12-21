@@ -21,13 +21,11 @@ public class FireDropZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     
     void Start()
     {
-        // Try to find LogPileCycler if not assigned
         if (logPileCycler == null)
         {
             logPileCycler = FindObjectOfType<LogPileCycler>();
         }
         
-        // Get image component for visual feedback
         imageComponent = GetComponent<UnityEngine.UI.Image>();
         if (imageComponent != null)
         {
@@ -37,7 +35,6 @@ public class FireDropZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // Show highlight when hovering
         ShowHighlight();
     }
     
@@ -53,7 +50,6 @@ public class FireDropZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             return false;
         }
         
-        // Check if we can add more logs
         return logPileCycler.GetCurrentLogCount() < maxLogs;
     }
     

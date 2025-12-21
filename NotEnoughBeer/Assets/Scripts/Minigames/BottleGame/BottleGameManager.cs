@@ -54,17 +54,14 @@ public class BottleGameManager : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        // Show start screen, hide everything else
         if (startScreen != null) startScreen.SetActive(true);
         if (gameUI != null) gameUI.SetActive(false);
         if (endScreen != null) endScreen.SetActive(false);
         if (countdownText != null) countdownText.gameObject.SetActive(false);
         
-        // Disable game components
         if (bottleSpawner != null) bottleSpawner.enabled = false;
         if (timingZone != null) timingZone.enabled = false;
         
-        // Set initial difficulty selection visual
         UpdateDifficultyButtons();
     }
 
@@ -76,7 +73,6 @@ public class BottleGameManager : MonoBehaviour
             
             if (currentCountdown > 0)
             {
-                // Update countdown display
                 if (countdownText != null)
                 {
                     countdownText.text = Mathf.Ceil(currentCountdown).ToString();
@@ -84,7 +80,6 @@ public class BottleGameManager : MonoBehaviour
             }
             else
             {
-                // Countdown finished, start game
                 StartGame();
             }
         }
@@ -147,7 +142,6 @@ public class BottleGameManager : MonoBehaviour
     
     void UpdateDifficultyButtons()
     {
-        // Reset all buttons to normal color
         if (easyButton != null)
         {
             ColorBlock colors = easyButton.colors;
@@ -170,7 +164,6 @@ public class BottleGameManager : MonoBehaviour
             hardButton.colors = colors;
         }
         
-        // Highlight selected button
         Button selectedButton = null;
         switch (selectedDifficulty)
         {
@@ -199,7 +192,6 @@ public class BottleGameManager : MonoBehaviour
         countingDown = true;
         currentCountdown = countdownTime;
         
-        // Hide start screen, show countdown
         if (startScreen != null) startScreen.SetActive(false);
         if (countdownText != null) 
         {
@@ -213,15 +205,12 @@ public class BottleGameManager : MonoBehaviour
         countingDown = false;
         gameStarted = true;
         
-        // Initialize bottle counter
         bottlesRemaining = totalBottles;
         UpdateBottlesRemainingUI();
         
-        // Hide countdown, show game UI
         if (countdownText != null) countdownText.gameObject.SetActive(false);
         if (gameUI != null) gameUI.SetActive(true);
         
-        // Enable game components
         if (bottleSpawner != null) bottleSpawner.enabled = true;
         if (timingZone != null) timingZone.enabled = true;
         
@@ -251,7 +240,6 @@ public class BottleGameManager : MonoBehaviour
     {
         Debug.Log("Game Ended!");
 
-        // Calculate score first
         int finalScore = 0;
         int missed = 0;
         if (timingZone != null)
@@ -260,26 +248,19 @@ public class BottleGameManager : MonoBehaviour
             missed = timingZone.GetMissed();
         }
 
-        // Turn that into a single float value for the batch system
         float scoreValue = Mathf.Max(0, finalScore - missed * 0.5f);
 
-        // ===== If we came from a machine, report back and return to main =====
         if (MinigameBridge.Instance != null)
         {
             MinigameBridge.Instance.FinishMinigame(scoreValue);
-            return; // we�re leaving this scene, no need to show endScreen
+            return;
         }
-
-        // ===== Fallback: old behaviour if no bridge exists =====
-        // Disable game components
         if (bottleSpawner != null) bottleSpawner.enabled = false;
         if (timingZone != null) timingZone.enabled = false;
 
-        // Hide game UI, show end screen
         if (gameUI != null) gameUI.SetActive(false);
         if (endScreen != null) endScreen.SetActive(true);
 
-        // Display final score
         if (finalScoreText != null)
         {
             finalScoreText.text = "Final Score: " + finalScore + "\nMissed: " + missed;
@@ -295,14 +276,12 @@ public class BottleGameManager : MonoBehaviour
     
     private System.Collections.IEnumerator AnimateBottleCap()
     {
-        // Store original positions
         Vector3 bottomOriginal = bottomPart != null ? bottomPart.localPosition : Vector3.zero;
         Vector3 secondBottomOriginal = secondBottomPart != null ? secondBottomPart.localPosition : Vector3.zero;
         Vector3 middleOriginal = middlePart != null ? middlePart.localPosition : Vector3.zero;
         
         float elapsed;
         
-        // Step 1: Move all three parts down 0.1f
         Vector3 bottomStep1 = bottomOriginal + Vector3.down * stepDistance;
         Vector3 secondBottomStep1 = secondBottomOriginal + Vector3.down * stepDistance;
         Vector3 middleStep1 = middleOriginal + Vector3.down * stepDistance;
@@ -323,7 +302,6 @@ public class BottleGameManager : MonoBehaviour
             yield return null;
         }
         
-        // Step 2: Move SecondBottom and Bottom down another 0.1f
         Vector3 bottomStep2 = bottomStep1 + Vector3.down * stepDistance;
         Vector3 secondBottomStep2 = secondBottomStep1 + Vector3.down * stepDistance;
         
@@ -341,7 +319,6 @@ public class BottleGameManager : MonoBehaviour
             yield return null;
         }
         
-        // Step 3: Move only Bottom down another 0.1f
         Vector3 bottomStep3 = bottomStep2 + Vector3.down * stepDistance;
         
         elapsed = 0f;
@@ -356,10 +333,8 @@ public class BottleGameManager : MonoBehaviour
             yield return null;
         }
         
-        // Hold briefly at the bottom
         yield return new WaitForSeconds(0.1f);
         
-        // Return all parts to original positions slowly
         elapsed = 0f;
         while (elapsed < returnDuration)
         {
@@ -376,7 +351,6 @@ public class BottleGameManager : MonoBehaviour
             yield return null;
         }
         
-        // Ensure final positions are exact
         if (bottomPart != null)
             bottomPart.localPosition = bottomOriginal;
         if (secondBottomPart != null)

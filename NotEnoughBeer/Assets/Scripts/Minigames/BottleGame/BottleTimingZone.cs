@@ -22,7 +22,6 @@ public class BottleTimingZone : MonoBehaviour
 
     void Update()
     {
-        // Update button text position to follow the bottle
         if (currentBottle != null && buttonDisplayText != null)
         {
             Vector3 worldPosition = currentBottle.transform.position + buttonOffset;
@@ -32,7 +31,6 @@ public class BottleTimingZone : MonoBehaviour
         
         if (Keyboard.current != null)
         {
-            // Check for the required key input using new Input System
             if (Keyboard.current[requiredKey].wasPressedThisFrame)
             {
                 if (isInZone && currentBottle != null)
@@ -44,7 +42,6 @@ public class BottleTimingZone : MonoBehaviour
                     OnFailedTiming();
                 }
             }
-            // Check if any wrong key was pressed
             else if (isInZone && currentBottle != null)
             {
                 foreach (Key key in possibleKeys)
@@ -67,10 +64,8 @@ public class BottleTimingZone : MonoBehaviour
             currentBottle = other.gameObject;
             bottleCaught = false;
             
-            // Select a random key
             requiredKey = possibleKeys[Random.Range(0, possibleKeys.Length)];
             
-            // Update UI to show the required key
             if (buttonDisplayText != null)
             {
                 buttonDisplayText.text = requiredKey.ToString();
@@ -83,18 +78,14 @@ public class BottleTimingZone : MonoBehaviour
     {
         if (other.CompareTag("Bottle") && currentBottle == other.gameObject && !bottleCaught)
         {
-            // Mark as caught immediately to prevent re-entry
             bottleCaught = true;
             isInZone = false;
             
-            // Store reference before clearing
             GameObject missedBottle = currentBottle;
             currentBottle = null;
             
-            // Call miss logic
             OnMissedBottle(missedBottle);
             
-            // Clear UI text
             if (buttonDisplayText != null)
             {
                 buttonDisplayText.text = "";
@@ -103,11 +94,9 @@ public class BottleTimingZone : MonoBehaviour
         }
         else if (other.CompareTag("Bottle") && currentBottle == other.gameObject)
         {
-            // Bottle was already caught/processed, just clean up
             isInZone = false;
             currentBottle = null;
             
-            // Clear UI text
             if (buttonDisplayText != null)
             {
                 buttonDisplayText.text = "";
@@ -119,13 +108,11 @@ public class BottleTimingZone : MonoBehaviour
     void OnSuccessfulTiming()
     {
         Debug.Log("Perfect! You caught the bottle!");
-        // Add your success logic here (points, effects, etc.)
         score++;
         UpdateScoreUI();
         
         bottleCaught = true;
         
-        // Change the bottle sprite to show it has a cap
         if (currentBottle != null && bottleWithCapSprite != null)
         {
             SpriteRenderer spriteRenderer = currentBottle.GetComponent<SpriteRenderer>();
@@ -138,13 +125,11 @@ public class BottleTimingZone : MonoBehaviour
         currentBottle = null;
         isInZone = false;
         
-        // Hide button text
         if (buttonDisplayText != null)
         {
             buttonDisplayText.gameObject.SetActive(false);
         }
         
-        // Notify game manager
         if (gameManager != null)
         {
             gameManager.OnBottleProcessed();
@@ -155,7 +140,6 @@ public class BottleTimingZone : MonoBehaviour
     void OnFailedTiming()
     {
         Debug.Log("Missed! No bottle in the zone.");
-        // Add your failure logic here
     }
 
     void OnWrongKeyPressed()
@@ -164,9 +148,8 @@ public class BottleTimingZone : MonoBehaviour
         missedBottles++;
         UpdateMissedUI();
         
-        bottleCaught = true; // Prevent counting as missed again when exiting zone
+        bottleCaught = true;
         
-        // Make the bottle shake
         if (currentBottle != null)
         {
             BottleScript bottleScript = currentBottle.GetComponent<BottleScript>();
@@ -176,18 +159,15 @@ public class BottleTimingZone : MonoBehaviour
             }
         }
         
-        // Keep the bottle on the conveyor - just clear the reference
         currentBottle = null;
         isInZone = false;
         
-        // Clear UI text
         if (buttonDisplayText != null)
         {
             buttonDisplayText.text = "";
             buttonDisplayText.gameObject.SetActive(false);
         }
         
-        // Notify game manager
         if (gameManager != null)
         {
             gameManager.OnBottleProcessed();
@@ -197,11 +177,9 @@ public class BottleTimingZone : MonoBehaviour
     void OnMissedBottle(GameObject missedBottle)
     {
         Debug.Log("Bottle passed without pressing space!");
-        // Add logic for missing the bottle completely
         missedBottles++;
         UpdateMissedUI();
         
-        // Notify game manager
         if (gameManager != null)
         {
             gameManager.OnBottleProcessed();

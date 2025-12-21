@@ -27,7 +27,6 @@ public class BottleMoveScript : MonoBehaviour
             Vector3 spawnPosition = spawnPoint != null ? spawnPoint.position : transform.position;
             GameObject bottle = Instantiate(bottlePrefab, spawnPosition, Quaternion.identity);
             
-            // Add movement to the spawned bottle
             Rigidbody2D rb = bottle.GetComponent<Rigidbody2D>();
             if (rb == null)
             {

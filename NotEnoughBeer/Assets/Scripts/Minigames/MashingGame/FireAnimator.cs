@@ -27,10 +27,8 @@ public class FireAnimator : MonoBehaviour
     
     void Awake()
     {
-        // Try to get SpriteRenderer first (for GameObject with SpriteRenderer)
         spriteRenderer = GetComponent<SpriteRenderer>();
         
-        // If no SpriteRenderer, try to get Image component (for UI Image)
         if (spriteRenderer == null)
         {
             imageComponent = GetComponent<Image>();
@@ -44,7 +42,6 @@ public class FireAnimator : MonoBehaviour
     
     void Start()
     {
-        // Set the initial sprite
         UpdateFireSprite();
         
         if (autoPlay)
@@ -59,7 +56,6 @@ public class FireAnimator : MonoBehaviour
         {
             timer += Time.deltaTime;
             
-            // Calculate when to switch to next frame
             float frameTime = 1f / framesPerSecond;
             
             if (timer >= frameTime)
@@ -70,26 +66,21 @@ public class FireAnimator : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Updates the displayed sprite based on currentFrameIndex
-    /// </summary>
+
     public void UpdateFireSprite()
     {
-        // Validate index
         if (currentFrameIndex < 0 || currentFrameIndex >= fireSprites.Length)
         {
             Debug.LogWarning($"Invalid frame index: {currentFrameIndex}. Must be between 0 and {fireSprites.Length - 1}");
             return;
         }
         
-        // Validate sprite exists
         if (fireSprites[currentFrameIndex] == null)
         {
             Debug.LogWarning($"No sprite assigned at index {currentFrameIndex}");
             return;
         }
         
-        // Update the appropriate component
         if (spriteRenderer != null)
         {
             spriteRenderer.sprite = fireSprites[currentFrameIndex];
@@ -100,18 +91,12 @@ public class FireAnimator : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Advance to the next frame in the animation
-    /// </summary>
     public void NextFrame()
     {
         currentFrameIndex = (currentFrameIndex + 1) % fireSprites.Length;
         UpdateFireSprite();
     }
     
-    /// <summary>
-    /// Go to the previous frame in the animation
-    /// </summary>
     public void PreviousFrame()
     {
         currentFrameIndex--;
@@ -122,61 +107,40 @@ public class FireAnimator : MonoBehaviour
         UpdateFireSprite();
     }
     
-    /// <summary>
-    /// Set the fire to a specific frame (0-2)
-    /// </summary>
     public void SetFrame(int index)
     {
         currentFrameIndex = Mathf.Clamp(index, 0, fireSprites.Length - 1);
         UpdateFireSprite();
     }
     
-    /// <summary>
-    /// Start playing the fire animation
-    /// </summary>
     public void Play()
     {
         isPlaying = true;
         timer = 0f;
     }
-    
-    /// <summary>
-    /// Stop playing the fire animation
-    /// </summary>
+
     public void Stop()
     {
         isPlaying = false;
     }
     
-    /// <summary>
-    /// Pause the fire animation (keeps current frame)
-    /// </summary>
     public void Pause()
     {
         isPlaying = false;
     }
-    
-    /// <summary>
-    /// Resume the fire animation from current frame
-    /// </summary>
+
     public void Resume()
     {
         isPlaying = true;
     }
-    
-    /// <summary>
-    /// Reset to the first frame
-    /// </summary>
+
     public void Reset()
     {
         currentFrameIndex = 0;
         timer = 0f;
         UpdateFireSprite();
     }
-    
-    /// <summary>
-    /// Check if the animation is currently playing
-    /// </summary>
+
     public bool IsPlaying()
     {
         return isPlaying;

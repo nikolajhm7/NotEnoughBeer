@@ -41,12 +41,11 @@ public class MashingGameScorer : MonoBehaviour
     
     private float[] stirHistory;
     private int historyIndex = 0;
-    private float historyInterval = 0.1f; // Check every 0.1 seconds
+    private float historyInterval = 0.1f;
     private float historyTimer = 0f;
     
     void Start()
     {
-        // Try to find references if not assigned
         if (thermometer == null)
         {
             thermometer = FindAnyObjectByType<Thermometer>();
@@ -57,46 +56,39 @@ public class MashingGameScorer : MonoBehaviour
             spoonStirrer = FindAnyObjectByType<SpoonStirrer>();
         }
         
-        // Initialize stir history array
         int historySize = Mathf.CeilToInt(stirCheckWindow / historyInterval);
         stirHistory = new float[historySize];
     }
     
     void Update()
     {
-        // Update stir history
         historyTimer += Time.deltaTime;
         if (historyTimer >= historyInterval)
         {
             historyTimer -= historyInterval;
             
-            // Record current stir state
             bool isCurrentlyStirring = spoonStirrer != null && spoonStirrer.IsStirring();
             stirHistory[historyIndex] = isCurrentlyStirring ? historyInterval : 0f;
             
             historyIndex = (historyIndex + 1) % stirHistory.Length;
         }
         
-        // Calculate total stir time in recent window
         recentStirTime = 0f;
         for (int i = 0; i < stirHistory.Length; i++)
         {
             recentStirTime += stirHistory[i];
         }
         
-        // Check if scoring conditions are met
         bool temperatureOK = IsTemperatureInRange();
         bool stirringOK = recentStirTime >= minStirTimeRequired;
         
         isScoring = temperatureOK && stirringOK;
         
-        // Add score if conditions are met
         if (isScoring)
         {
             currentScore += pointsPerSecond * Time.deltaTime;
         }
         
-        // Update score display
         UpdateScoreUI();
     }
     
@@ -111,33 +103,21 @@ public class MashingGameScorer : MonoBehaviour
         return temp >= minTemperature && temp <= maxTemperature;
     }
     
-    /// <summary>
-    /// Get the current score
-    /// </summary>
     public float GetScore()
     {
         return currentScore;
     }
-    
-    /// <summary>
-    /// Get the current score as an integer
-    /// </summary>
+
     public int GetScoreInt()
     {
         return Mathf.FloorToInt(currentScore);
     }
     
-    /// <summary>
-    /// Check if currently earning points
-    /// </summary>
     public bool IsEarningPoints()
     {
         return isScoring;
     }
     
-    /// <summary>
-    /// Reset the score
-    /// </summary>
     public void ResetScore()
     {
         currentScore = 0f;
@@ -145,9 +125,6 @@ public class MashingGameScorer : MonoBehaviour
         historyIndex = 0;
     }
     
-    /// <summary>
-    /// Get a summary of current conditions for debugging
-    /// </summary>
     public string GetConditionsSummary()
     {
         float temp = thermometer != null ? thermometer.currentTemperature : 0f;
@@ -157,9 +134,6 @@ public class MashingGameScorer : MonoBehaviour
         return $"Temp: {temp:F1}° ({(tempOK ? "✓" : "✗")}) | Stir: {recentStirTime:F1}s/{minStirTimeRequired}s ({(stirOK ? "✓" : "✗")}) | Score: {GetScoreInt()}";
     }
     
-    /// <summary>
-    /// Update the score display UI
-    /// </summary>
     private void UpdateScoreUI()
     {
         if (scoreText != null)
