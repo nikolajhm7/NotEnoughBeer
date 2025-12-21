@@ -20,6 +20,9 @@ public class SaveManager : MonoBehaviour
     // Save slots
     public static int CurrentSlot = 1;
     public bool AutoLoadOnStart = true;
+    public int TotalSales { get; private set; }
+
+
 
     // Data
     Dictionary<string, MachineDefinition> DefinitionsById;
@@ -44,6 +47,12 @@ public class SaveManager : MonoBehaviour
         }
     }
 
+
+    public void AddSales(int amount)
+    {
+        if (amount <= 0) return;
+        TotalSales += amount;
+    }
     public void SaveAndReload()
     {
         Save();
@@ -76,7 +85,10 @@ public class SaveManager : MonoBehaviour
             PocketItems = PocketInventory.Instance ? PocketInventory.Instance.Inv.ToStacks() : new List<ItemStack>(),
 
             // NEW: containers (filled below)
-            Containers = new List<ContainerSave>()
+            Containers = new List<ContainerSave>(),
+            TotalSales = TotalSales
+
+
         };
 
         var machineInstances = FindObjectsByType<MachineInstance>(FindObjectsSortMode.None);
@@ -131,10 +143,13 @@ public class SaveManager : MonoBehaviour
             return;
         }
 
+        
+
         ClearAllMachinesAndOccupancy();
 
         var json = File.ReadAllText(SavePath);
         var data = JsonUtility.FromJson<SaveData>(json);
+        TotalSales = data.TotalSales;
 
         Grid.Clear();
 

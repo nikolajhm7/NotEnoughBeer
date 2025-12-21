@@ -1746,7 +1746,28 @@ MonoBehaviour:
   moneyText: {fileID: 1245984921}
   toastText: {fileID: 485769921}
   grid: {fileID: 597805833}
-  saveManager: {fileID: 0}
+  saveManager: {fileID: 324687754}
+  startingUnlockedIds:
+  - barley
+  - yeast
+  - bottles
+  - beermaker9000
+  unlockSteps:
+  - requiredTotalSales: 300
+    unlockDefinitionIds:
+    - Storage Container
+    - Malting Machine
+  - requiredTotalSales: 400
+    unlockDefinitionIds:
+    - garage_upgrade
+    - Mashing Machine
+  - requiredTotalSales: 600
+    unlockDefinitionIds:
+    - Fermentation Machine
+    - Conditioning Machine
+  - requiredTotalSales: 700
+    unlockDefinitionIds:
+    - Packaging Machine
 --- !u!114 &573456235
 MonoBehaviour:
   m_ObjectHideFlags: 0

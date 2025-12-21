@@ -29,6 +29,8 @@ public class SaveData
 
     // NEW: container inventories
     public List<ContainerSave> Containers = new();
+
+    public int TotalSales;
 }
 
 [Serializable]

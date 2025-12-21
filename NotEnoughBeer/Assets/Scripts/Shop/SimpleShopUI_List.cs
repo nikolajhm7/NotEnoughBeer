@@ -21,9 +21,9 @@ public class SimpleShopUI_List : MonoBehaviour
     [SerializeField] Button addBeerDebugButton;
 
     [Header("NEW: Sell Filters (optional)")]
-    [SerializeField] TMP_Dropdown sellRarityDropdown;     
-    [SerializeField] Toggle sellFromPocketToggle;         
-    [SerializeField] Toggle sellFromContainersToggle;     
+    [SerializeField] TMP_Dropdown sellRarityDropdown;
+    [SerializeField] Toggle sellFromPocketToggle;
+    [SerializeField] Toggle sellFromContainersToggle;
 
     [Header("HUD")]
     [SerializeField] TMP_Text moneyText;
@@ -38,13 +38,71 @@ public class SimpleShopUI_List : MonoBehaviour
     public bool IsOpen => rootPanel && rootPanel.activeSelf;
     readonly List<GameObject> _spawnedRows = new();
 
+    // =========================
+    // Progression / Unlocks
+    // =========================
+
+    [Header("Progression / Unlocks")]
+    [SerializeField]
+    List<string> startingUnlockedIds = new List<string>
+    {
+        "barley", "yeast", "bottles", "beermaker9000"
+    };
+
+    [System.Serializable]
+    public class UnlockStep
+    {
+        public int requiredTotalSales;
+        public List<string> unlockDefinitionIds;
+    }
+
+    [SerializeField] List<UnlockStep> unlockSteps = new List<UnlockStep>();
+
+    readonly HashSet<string> _unlocked = new HashSet<string>();
+
+    void RebuildUnlockedSet()
+    {
+        _unlocked.Clear();
+
+        foreach (var id in startingUnlockedIds)
+            if (!string.IsNullOrWhiteSpace(id))
+                _unlocked.Add(id.Trim().ToLower());
+
+        int sales = saveManager ? saveManager.TotalSales : 0;
+
+        foreach (var step in unlockSteps)
+        {
+            if (step == null) continue;
+            if (sales < step.requiredTotalSales) continue;
+            if (step.unlockDefinitionIds == null) continue;
+
+            foreach (var id in step.unlockDefinitionIds)
+                if (!string.IsNullOrWhiteSpace(id))
+                    _unlocked.Add(id.Trim().ToLower());
+        }
+    }
+
+    bool IsUnlocked(MachineDefinition def)
+    {
+        if (!def) return false;
+
+        // Prefer MachineDefinition.id. Fallback to name if needed.
+        string id = !string.IsNullOrEmpty(def.id) ? def.id : def.name;
+        id = id.Trim().ToLower();
+
+        return _unlocked.Contains(id);
+    }
+
     void Awake()
     {
         Hide();
+
+        // IMPORTANT: build unlocked set before building the list
+        RebuildUnlockedSet();
         BuildList();
+
         HookSell();
         RefreshAll();
-
         BuildSellRarityDropdownIfNeeded();
     }
 
@@ -61,15 +119,22 @@ public class SimpleShopUI_List : MonoBehaviour
         if (rootPanel) rootPanel.SetActive(false);
     }
 
-    
+    // =========================
+    // Buy List
+    // =========================
+
     void BuildList()
     {
+        // Always rebuild unlocked set, because TotalSales may have changed.
+        RebuildUnlockedSet();
+
         foreach (var go in _spawnedRows) Destroy(go);
         _spawnedRows.Clear();
 
         foreach (var def in catalog)
         {
             if (!def) continue;
+            if (!IsUnlocked(def)) continue;
 
             var row = Instantiate(rowPrefab, listContainer);
             _spawnedRows.Add(row);
@@ -122,7 +187,6 @@ public class SimpleShopUI_List : MonoBehaviour
             SFXManager.Instance.Play(SFX.Purchase);
     }
 
-    
     void BuyBarley(MachineDefinition def)
     {
         if (!Currency.Instance.SpendCurrency(def.cost))
@@ -133,7 +197,6 @@ public class SimpleShopUI_List : MonoBehaviour
 
         int amount = 10;
 
-        
         if (PocketInventory.Instance != null)
         {
             if (!PocketInventory.Instance.Inv.TryAdd(ItemId.Barley, amount))
@@ -146,7 +209,6 @@ public class SimpleShopUI_List : MonoBehaviour
             return;
         }
 
-        
         if (IngredientStorage.Instance != null)
         {
             IngredientStorage.Instance.AddBarley(amount);
@@ -234,7 +296,10 @@ public class SimpleShopUI_List : MonoBehaviour
         Hide();
     }
 
-    
+    // =========================
+    // Sell
+    // =========================
+
     void HookSell()
     {
         if (sellAllButton)
@@ -248,10 +313,10 @@ public class SimpleShopUI_List : MonoBehaviour
                     return;
                 }
 
-                
+                // New system (pocket + containers)
                 if (PocketInventory.Instance != null || StorageRegistry.Instance != null)
                 {
-                    var rarity = GetSelectedRarityOrNull(); 
+                    var rarity = GetSelectedRarityOrNull();
                     bool fromPocket = sellFromPocketToggle ? sellFromPocketToggle.isOn : true;
                     bool fromContainers = sellFromContainersToggle ? sellFromContainersToggle.isOn : true;
 
@@ -265,13 +330,28 @@ public class SimpleShopUI_List : MonoBehaviour
                         return;
                     }
 
+                    int before = saveManager ? saveManager.TotalSales : 0;
+
                     Currency.Instance.AddCurrency(payout);
+
+                    if (saveManager != null)
+                    {
+                        saveManager.AddSales(payout);
+                        saveManager.Save(); // optional but recommended for persistence
+                    }
+
+                    int after = saveManager ? saveManager.TotalSales : 0;
+                    if (after != before)
+                    {
+                        BuildList(); // might unlock new items
+                    }
+
                     Toast($"Sold {sold} bottles for ${payout}.");
                     RefreshAll();
                     return;
                 }
 
-                
+                // Old system (BeerStorage)
                 if (BeerStorage.Instance == null)
                 {
                     Toast("No BeerStorage in scene.");
@@ -287,7 +367,22 @@ public class SimpleShopUI_List : MonoBehaviour
                     return;
                 }
 
+                int beforeOld = saveManager ? saveManager.TotalSales : 0;
+
                 Currency.Instance.AddCurrency(payoutOld);
+
+                if (saveManager != null)
+                {
+                    saveManager.AddSales(payoutOld);
+                    saveManager.Save(); // optional but recommended for persistence
+                }
+
+                int afterOld = saveManager ? saveManager.TotalSales : 0;
+                if (afterOld != beforeOld)
+                {
+                    BuildList();
+                }
+
                 Toast($"Sold {totalBottles} bottles for ${payoutOld}.");
                 RefreshAll();
             });
@@ -298,7 +393,7 @@ public class SimpleShopUI_List : MonoBehaviour
             addBeerDebugButton.onClick.RemoveAllListeners();
             addBeerDebugButton.onClick.AddListener(() =>
             {
-                
+                // Debug add to pocket if exists
                 if (PocketInventory.Instance != null)
                 {
                     PocketInventory.Instance.Inv.TryAdd(ItemId.Beer_Common, 5);
@@ -306,7 +401,7 @@ public class SimpleShopUI_List : MonoBehaviour
                     return;
                 }
 
-                
+                // Fallback
                 BeerStorage.Instance?.AddBeer(5);
                 RefreshSellTexts();
             });
@@ -318,7 +413,6 @@ public class SimpleShopUI_List : MonoBehaviour
         soldTotal = 0;
         payoutTotal = 0;
 
-        
         if (!rarityFilter.HasValue)
         {
             SellBeerItem(ItemId.Beer_Common, fromPocket, fromContainers, ref soldTotal, ref payoutTotal);
@@ -366,7 +460,10 @@ public class SimpleShopUI_List : MonoBehaviour
         }
     }
 
-   
+    // =========================
+    // Garage Upgrade
+    // =========================
+
     int GetGarageUpgradeLevel()
     {
         if (!grid) return 0;
@@ -413,7 +510,10 @@ public class SimpleShopUI_List : MonoBehaviour
         RefreshAll();
     }
 
-    
+    // =========================
+    // Refresh / HUD
+    // =========================
+
     void RefreshAll()
     {
         RefreshMoney();
@@ -432,7 +532,7 @@ public class SimpleShopUI_List : MonoBehaviour
 
         if (!beerCountText) return;
 
-        
+        // New system
         if (PocketInventory.Instance != null || StorageRegistry.Instance != null)
         {
             int total =
@@ -446,7 +546,7 @@ public class SimpleShopUI_List : MonoBehaviour
             return;
         }
 
-        
+        // Old system
         int countOld = BeerStorage.Instance ? BeerStorage.Instance.TotalBottles : 0;
         beerCountText.text = $"{countOld} units";
     }
@@ -472,7 +572,10 @@ public class SimpleShopUI_List : MonoBehaviour
         if (toastText) toastText.text = msg;
     }
 
-    
+    // =========================
+    // Sell filters UI
+    // =========================
+
     void BuildSellRarityDropdownIfNeeded()
     {
         if (!sellRarityDropdown) return;
@@ -493,7 +596,6 @@ public class SimpleShopUI_List : MonoBehaviour
     {
         if (!sellRarityDropdown) return null;
 
-        
         switch (sellRarityDropdown.value)
         {
             case 1: return BeerStorage.BeerRarity.Common;
@@ -520,7 +622,6 @@ public class SimpleShopUI_List : MonoBehaviour
 
     int GetUnitPriceForBeerId(ItemId id)
     {
-        
         if (BeerStorage.Instance == null) return 0;
 
         return id switch
