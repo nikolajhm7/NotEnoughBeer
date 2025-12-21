@@ -40,14 +40,14 @@ public class NotificationService : MonoBehaviour
             color = color.GetValueOrDefault()
         });
 
-        // If service already exists, show immediately.
+        
         if (Instance != null)
             Instance.FlushQueue();
     }
 
     public void Show(string message, Color? color = null)
     {
-        // If service not ready, queue it.
+       
         if (notificationPrefab == null || uiCanvas == null)
         {
             Enqueue(message, color);

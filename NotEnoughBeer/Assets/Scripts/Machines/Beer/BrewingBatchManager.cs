@@ -35,7 +35,7 @@ public class BrewingBatchManager : MonoBehaviour
         CurrentBatch.Advance();
     }
 
-    // rarity by quality
+    
     public BeerStorage.BeerRarity GetRarity()
     {
         if (CurrentBatch == null)

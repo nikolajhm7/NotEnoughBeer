@@ -20,7 +20,7 @@ public class IngredientStorage : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    // ---------- BARLEY ----------
+    
     public void AddBarley(int amount) => Barley += amount;
 
     public bool UseBarley(int amount)
@@ -30,7 +30,7 @@ public class IngredientStorage : MonoBehaviour
         return true;
     }
 
-    // ---------- YEAST ----------
+   
     public void AddYeast(int amount) => Yeast += amount;
 
     public bool UseYeast(int amount)
@@ -40,7 +40,7 @@ public class IngredientStorage : MonoBehaviour
         return true;
     }
 
-    // ---------- BOTTLES ----------
+    
     public void AddBottles(int amount) => Bottles += amount;
 
     public bool UseBottles(int amount)

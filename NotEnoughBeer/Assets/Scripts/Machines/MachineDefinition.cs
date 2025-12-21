@@ -13,7 +13,7 @@ public class MachineDefinition : ScriptableObject
     public Vector2Int[] occupiedOffsets = { Vector2Int.zero };
 
     [Header("Affected tiles (relative to machine forward)")]
-    public Vector2Int[] affectedOffsets = { new(0,1), new(0,2), new(0,3) }; // default 3 tiles in front of the palyer
+    public Vector2Int[] affectedOffsets = { new(0,1), new(0,2), new(0,3) }; 
 
     [Header("Preview tint colors")]
     public Color occupiedOk   = new(0.35f, 0.9f, 0.35f);

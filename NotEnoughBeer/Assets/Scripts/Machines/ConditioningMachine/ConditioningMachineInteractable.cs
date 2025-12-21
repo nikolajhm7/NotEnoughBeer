@@ -6,12 +6,12 @@ public class ConditioningMachineInteractable : BrewingMachineBase
 
     protected override bool HasIngredients()
     {
-        // No extra ingredients for now
+       
         return true;
     }
 
     protected override void ConsumeIngredients()
     {
-        // Later: additives, etc.
+        
     }
 }

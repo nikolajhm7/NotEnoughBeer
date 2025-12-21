@@ -36,7 +36,7 @@ public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
             return;
         }
 
-        // consume
+        
         inv.TryRemove(ItemId.Barley, barleyPerBatch);
         inv.TryRemove(ItemId.Yeast, yeastPerBatch);
         inv.TryRemove(ItemId.Bottles, bottlesPerBatch);
@@ -45,14 +45,14 @@ public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
         var rarity = QualityToRarity(quality);
         var beerId = BeerItemForRarity(rarity);
 
-        // pocket first
+      
         if (inv.TryAdd(beerId, bottlesPerBatch))
         {
             NotificationService.Instance?.Show($"+{bottlesPerBatch} {rarity} beer (quality {quality:F1})", MapRarityToColor(rarity));
         }
         else
         {
-            // container fallback
+            
             var container = FindFirstContainerWithSpace(bottlesPerBatch);
             if (container != null && container.Inv.TryAdd(beerId, bottlesPerBatch))
             {
@@ -61,7 +61,7 @@ public class BeerMaker9000Interactable : MonoBehaviour, IInteractable
             else
             {
                 NotificationService.Instance?.Show("No space for beer! Pocket + containers are full.");
-                // rollback (optional): give ingredients back
+                
                 inv.TryAdd(ItemId.Barley, barleyPerBatch);
                 inv.TryAdd(ItemId.Yeast, yeastPerBatch);
                 inv.TryAdd(ItemId.Bottles, bottlesPerBatch);

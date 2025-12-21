@@ -9,6 +9,6 @@ public class MachineInstance : MonoBehaviour
     public List<Vector2Int> occupiedCells = new();
     public List<Vector2Int> affectedCells = new();
 
-    // persisted yOffset for save/load
+    
     public float YOffset;
 }

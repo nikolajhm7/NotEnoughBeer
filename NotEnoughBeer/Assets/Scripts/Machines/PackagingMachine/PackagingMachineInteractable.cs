@@ -30,14 +30,14 @@ public class PackagingMachineInteractable : BrewingMachineBase
         var rarity = bm.GetRarity();
         var beerId = BeerItemForRarity(rarity);
 
-        // pocket first
+       
         if (PocketInventory.Instance != null && PocketInventory.Instance.Inv.TryAdd(beerId, bottlesPerBatch))
         {
             Debug.Log($"[Packaging] Added {bottlesPerBatch} {rarity} beer to pocket.");
             return;
         }
 
-        // then containers
+       
         var container = FindFirstContainerWithSpace(bottlesPerBatch);
         if (container != null && container.Inv.TryAdd(beerId, bottlesPerBatch))
         {

@@ -41,7 +41,7 @@ public class MachinePlacer : MonoBehaviour
             }
         }
 
-        // Debug money add (for testing)
+        
         if (kb.gKey.wasPressedThisFrame && Currency.Instance != null)
         {
             Currency.Instance.AddCurrency(10);
@@ -62,7 +62,7 @@ public class MachinePlacer : MonoBehaviour
         }
     }
 
-    // Allow UI to equip a machine for placement.
+   
     public void EquipFromUI(MachineDefinition def)
     {
         Equip(def);

@@ -9,8 +9,8 @@ public abstract class BrewingMachineBase : MonoBehaviour, IInteractable
 
     [Header("Minigame / Settings")]
     public int priority = 0;
-    public string minigameSceneName;          // leave empty if you don't have a minigame yet
-    public float autoScoreIfNoMinigame = 20f; // score used when no scene is set
+    public string minigameSceneName;          
+    public float autoScoreIfNoMinigame = 20f; 
 
     public int Priority => priority;
 
@@ -25,7 +25,7 @@ public abstract class BrewingMachineBase : MonoBehaviour, IInteractable
         return interactionDescription;
     }
 
-    // Always allow highlighting so PlayerInteractor can show text
+    
     public virtual bool CanInteract(PlayerInteractor ctx) => true;
 
     public void Interact(PlayerInteractor ctx)
@@ -85,11 +85,11 @@ public abstract class BrewingMachineBase : MonoBehaviour, IInteractable
     {
         var manager = BrewingBatchManager.Instance;
 
-        // If manager missing, don't allow running later stages
+        
         if (manager == null)
-            return RequiredStage == Batch.Stage.Malting; // malting is "start batch"
+            return RequiredStage == Batch.Stage.Malting; 
 
-        // Malting can always start a batch (if ingredients exist)
+        
         if (RequiredStage == Batch.Stage.Malting)
             return true;
 

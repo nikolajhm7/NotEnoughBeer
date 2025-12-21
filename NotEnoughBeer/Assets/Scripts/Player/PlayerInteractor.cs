@@ -50,13 +50,13 @@ public class PlayerInteractor : MonoBehaviour
         var kb = Keyboard.current;
         if (kb == null) return;
 
-        // F = primary interact
+        
         if (kb[InteractKey].wasPressedThisFrame)
         {
             current?.Interact(this);
         }
 
-        // R = secondary interact (show storage)
+        
         if (kb[SecondaryKey].wasPressedThisFrame)
         {
             if (current is StorageContainerInteractable storage)

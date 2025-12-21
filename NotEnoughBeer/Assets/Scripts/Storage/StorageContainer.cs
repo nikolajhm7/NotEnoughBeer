@@ -12,12 +12,12 @@ public class StorageContainer : MonoBehaviour
         Inv = new Inventory(capacity);
     }
 
-    // ✅ THIS is what I meant
+    
     public void SetCapacity(int newCapacity)
     {
         capacity = Mathf.Max(0, newCapacity);
 
-        // If Inventory already exists, update it
+        
         if (Inv != null)
             Inv.SetCapacity(capacity);
         else

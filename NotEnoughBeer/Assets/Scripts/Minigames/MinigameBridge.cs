@@ -33,7 +33,7 @@ public class MinigameBridge : MonoBehaviour
         _onComplete = onComplete;
         _returnSceneName = SceneManager.GetActiveScene().name;
 
-        // 🔹 Save current world state before leaving
+        
         var saveManager = FindObjectOfType<SaveManager>();
         if (saveManager != null)
         {
@@ -57,17 +57,17 @@ public class MinigameBridge : MonoBehaviour
 
         _pendingScore = score;
 
-        // When the main scene is reloaded, call OnReturnSceneLoaded
+        
         SceneManager.sceneLoaded += OnReturnSceneLoaded;
         SceneManager.LoadScene(_returnSceneName);
     }
 
     void OnReturnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Make sure we only run once
+        
         SceneManager.sceneLoaded -= OnReturnSceneLoaded;
 
-        // 🔹 Reload saved world state
+        
         var saveManager = FindObjectOfType<SaveManager>();
         if (saveManager != null)
         {
@@ -78,7 +78,7 @@ public class MinigameBridge : MonoBehaviour
             Debug.LogWarning("[MinigameBridge] No SaveManager found after returning from minigame.");
         }
 
-        // 🔹 Give the score back to the machine / batch
+        
         _onComplete?.Invoke(_pendingScore);
         _onComplete = null;
     }

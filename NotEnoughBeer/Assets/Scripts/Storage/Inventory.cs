@@ -63,7 +63,7 @@ public class Inventory
         return true;
     }
 
-    // Save/load helpers
+    
     public List<ItemStack> ToStacks()
     {
         var list = new List<ItemStack>();

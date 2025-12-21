@@ -25,10 +25,10 @@ public class PlayerMovement : MonoBehaviour
     [Min(0.05f)] public float rotateHoldRepeatInterval = 0.15f;
 
     Vector2Int cell;
-    int facingIndex = 0;          // 0=N,1=E,2=S,3=W
+    int facingIndex = 0;        
     bool isMoving, isRotating;
 
-    // Repeat timers
+    
     float moveNextRepeatTime = -1f;
     Vector2Int lastHeldStep = Vector2Int.zero;
 
@@ -146,7 +146,7 @@ public class PlayerMovement : MonoBehaviour
         isMoving = false;
     }
 
-    IEnumerator Rotate(int dir) // dir = -1 left, +1 right
+    IEnumerator Rotate(int dir) 
     {
         isRotating = true;
         facingIndex = (facingIndex + dir + 4) % 4;
@@ -188,7 +188,7 @@ public class PlayerMovement : MonoBehaviour
         };
     }
 
-    // Priority: forward (W), backward (S), left (A), right (D). Arrows are aliases.
+   
     Vector2Int GetStepDirFromKeys(Keyboard kb)
     {
         Vector2Int f = FacingDir();
@@ -205,7 +205,7 @@ public class PlayerMovement : MonoBehaviour
         if (a && !d) return left;
         if (d && !a) return right;
 
-        // conflicting or none
+        
         return Vector2Int.zero;
     }
 
@@ -217,9 +217,7 @@ public class PlayerMovement : MonoBehaviour
         if (!enableRotateHold) { nextTime = -1f; return; }
         nextTime = Time.time + initialDelay;
     }
-    /// <summary>
-    /// Instantly teleport the player to the specified cell (for loading game).
-    /// </summary>
+   
     public void TeleportToCell(Vector2Int c)
     {
         cell = c;
@@ -227,10 +225,8 @@ public class PlayerMovement : MonoBehaviour
         PositionInitializedFromSave = true;
     }
 
-    /// <summary>
-    /// Instantly set the player's facing direction (for loading game).
-    /// </summary>
-    /// <param name="index"></param>
+    
+    /// <param name="index"
     public void SetFacingIndex(int index)
     {
         facingIndex = ((index % 4) + 4) % 4; // ensure 0-3

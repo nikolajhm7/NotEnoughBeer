@@ -5,7 +5,7 @@ public class ComputerInteractable : MonoBehaviour, IInteractable
     [TextArea] public string InteractionDescription = "Use Computer (Shop)";
     public int priority = 0;
 
-    [SerializeField] private SimpleShopUI_List shopUI; // or SimpleShopUI_MachinePlacer if you switched
+    [SerializeField] private SimpleShopUI_List shopUI; 
 
     public int Priority => priority;
     public string GetInteractionDescription(PlayerInteractor context) => InteractionDescription;
@@ -14,7 +14,7 @@ public class ComputerInteractable : MonoBehaviour, IInteractable
     void Awake()
     {
         if (!shopUI)
-            shopUI = FindObjectOfType<SimpleShopUI_List>(true); // finds even inactive panels
+            shopUI = FindObjectOfType<SimpleShopUI_List>(true); 
 
         if (!shopUI)
             Debug.LogWarning("[Computer] Couldn't find SimpleShopUI_List in the scene. Did the script compile and is it on your panel?");

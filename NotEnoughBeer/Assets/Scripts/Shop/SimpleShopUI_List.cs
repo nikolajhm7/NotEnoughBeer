@@ -21,9 +21,9 @@ public class SimpleShopUI_List : MonoBehaviour
     [SerializeField] Button addBeerDebugButton;
 
     [Header("NEW: Sell Filters (optional)")]
-    [SerializeField] TMP_Dropdown sellRarityDropdown;     // Common..Legendary (optional)
-    [SerializeField] Toggle sellFromPocketToggle;         // optional
-    [SerializeField] Toggle sellFromContainersToggle;     // optional
+    [SerializeField] TMP_Dropdown sellRarityDropdown;     
+    [SerializeField] Toggle sellFromPocketToggle;         
+    [SerializeField] Toggle sellFromContainersToggle;     
 
     [Header("HUD")]
     [SerializeField] TMP_Text moneyText;
@@ -61,7 +61,7 @@ public class SimpleShopUI_List : MonoBehaviour
         if (rootPanel) rootPanel.SetActive(false);
     }
 
-    // ---------- BUY LIST ----------
+    
     void BuildList()
     {
         foreach (var go in _spawnedRows) Destroy(go);
@@ -122,7 +122,7 @@ public class SimpleShopUI_List : MonoBehaviour
             SFXManager.Instance.Play(SFX.Purchase);
     }
 
-    // ---------- BUY INGREDIENTS ----------
+    
     void BuyBarley(MachineDefinition def)
     {
         if (!Currency.Instance.SpendCurrency(def.cost))
@@ -133,7 +133,7 @@ public class SimpleShopUI_List : MonoBehaviour
 
         int amount = 10;
 
-        // NEW: PocketInventory first
+        
         if (PocketInventory.Instance != null)
         {
             if (!PocketInventory.Instance.Inv.TryAdd(ItemId.Barley, amount))
@@ -146,7 +146,7 @@ public class SimpleShopUI_List : MonoBehaviour
             return;
         }
 
-        // FALLBACK: old IngredientStorage
+        
         if (IngredientStorage.Instance != null)
         {
             IngredientStorage.Instance.AddBarley(amount);
@@ -234,7 +234,7 @@ public class SimpleShopUI_List : MonoBehaviour
         Hide();
     }
 
-    // ---------- SELL ----------
+    
     void HookSell()
     {
         if (sellAllButton)
@@ -248,10 +248,10 @@ public class SimpleShopUI_List : MonoBehaviour
                     return;
                 }
 
-                // If new system exists, use it. Otherwise fallback to BeerStorage.
+                
                 if (PocketInventory.Instance != null || StorageRegistry.Instance != null)
                 {
-                    var rarity = GetSelectedRarityOrNull(); // null => sell all rarities
+                    var rarity = GetSelectedRarityOrNull(); 
                     bool fromPocket = sellFromPocketToggle ? sellFromPocketToggle.isOn : true;
                     bool fromContainers = sellFromContainersToggle ? sellFromContainersToggle.isOn : true;
 
@@ -271,7 +271,7 @@ public class SimpleShopUI_List : MonoBehaviour
                     return;
                 }
 
-                // FALLBACK: old BeerStorage sell all
+                
                 if (BeerStorage.Instance == null)
                 {
                     Toast("No BeerStorage in scene.");
@@ -298,7 +298,7 @@ public class SimpleShopUI_List : MonoBehaviour
             addBeerDebugButton.onClick.RemoveAllListeners();
             addBeerDebugButton.onClick.AddListener(() =>
             {
-                // NEW: add 5 common beer into pocket if possible
+                
                 if (PocketInventory.Instance != null)
                 {
                     PocketInventory.Instance.Inv.TryAdd(ItemId.Beer_Common, 5);
@@ -306,7 +306,7 @@ public class SimpleShopUI_List : MonoBehaviour
                     return;
                 }
 
-                // FALLBACK
+                
                 BeerStorage.Instance?.AddBeer(5);
                 RefreshSellTexts();
             });
@@ -318,7 +318,7 @@ public class SimpleShopUI_List : MonoBehaviour
         soldTotal = 0;
         payoutTotal = 0;
 
-        // if no filter: loop all beer item IDs
+        
         if (!rarityFilter.HasValue)
         {
             SellBeerItem(ItemId.Beer_Common, fromPocket, fromContainers, ref soldTotal, ref payoutTotal);
@@ -366,7 +366,7 @@ public class SimpleShopUI_List : MonoBehaviour
         }
     }
 
-    // ---------- GARAGE UPGRADE HELPERS ----------
+   
     int GetGarageUpgradeLevel()
     {
         if (!grid) return 0;
@@ -413,7 +413,7 @@ public class SimpleShopUI_List : MonoBehaviour
         RefreshAll();
     }
 
-    // ---------- UI refresh ----------
+    
     void RefreshAll()
     {
         RefreshMoney();
@@ -432,7 +432,7 @@ public class SimpleShopUI_List : MonoBehaviour
 
         if (!beerCountText) return;
 
-        // NEW system totals
+        
         if (PocketInventory.Instance != null || StorageRegistry.Instance != null)
         {
             int total =
@@ -446,7 +446,7 @@ public class SimpleShopUI_List : MonoBehaviour
             return;
         }
 
-        // FALLBACK old system
+        
         int countOld = BeerStorage.Instance ? BeerStorage.Instance.TotalBottles : 0;
         beerCountText.text = $"{countOld} units";
     }
@@ -472,7 +472,7 @@ public class SimpleShopUI_List : MonoBehaviour
         if (toastText) toastText.text = msg;
     }
 
-    // ---------- Sell dropdown helpers ----------
+    
     void BuildSellRarityDropdownIfNeeded()
     {
         if (!sellRarityDropdown) return;
@@ -493,7 +493,7 @@ public class SimpleShopUI_List : MonoBehaviour
     {
         if (!sellRarityDropdown) return null;
 
-        // 0 = All
+        
         switch (sellRarityDropdown.value)
         {
             case 1: return BeerStorage.BeerRarity.Common;
@@ -520,7 +520,7 @@ public class SimpleShopUI_List : MonoBehaviour
 
     int GetUnitPriceForBeerId(ItemId id)
     {
-        // Reuse BeerStorage prices as the “price table” for now. :contentReference[oaicite:2]{index=2}
+        
         if (BeerStorage.Instance == null) return 0;
 
         return id switch

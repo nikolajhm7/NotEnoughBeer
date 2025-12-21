@@ -20,7 +20,7 @@ public class BeerStorage : MonoBehaviour
     public int mythicalPrice = 40;
     public int legendaryPrice = 60;
 
-    // index = (int)BeerRarity
+    
     int[] _rarityCounts = new int[5];
 
     void Awake()
@@ -70,7 +70,7 @@ public class BeerStorage : MonoBehaviour
             _rarityCounts[(int)BeerRarity.Mythical] * mythicalPrice +
             _rarityCounts[(int)BeerRarity.Legendary] * legendaryPrice;
 
-        // clear inventory
+       
         for (int i = 0; i < _rarityCounts.Length; i++)
             _rarityCounts[i] = 0;
 

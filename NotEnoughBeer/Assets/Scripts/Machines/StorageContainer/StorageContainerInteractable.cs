@@ -22,7 +22,7 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
         return "Deposit all\nShift+F - Withdraw materials";
     }
 
-    // 🔹 CALLED BY PlayerInteractor (R key)
+    
     public void ShowStorageContents_Public()
     {
         ShowStorageContents();
@@ -142,7 +142,7 @@ public class StorageContainerInteractable : MonoBehaviour, IInteractable
 
         if (!to.TryAdd(id, canFit))
         {
-            from.TryAdd(id, canFit); // rollback
+            from.TryAdd(id, canFit); 
             return 0;
         }
 
