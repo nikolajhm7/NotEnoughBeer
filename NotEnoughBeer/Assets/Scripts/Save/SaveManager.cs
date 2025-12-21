@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using System.Linq;
+using System.Buffers.Text;
 
 public class SaveManager : MonoBehaviour
 {
@@ -157,16 +158,30 @@ public class SaveManager : MonoBehaviour
             var rot = Quaternion.Euler(0f, rec.FacingIndex * 90f, 0f);
             var pos = Grid.GridToWorld(anchor);
 
-            var go = Instantiate(def.prefab, pos, rot);
+            var baseXZ = Grid.GridToWorld(anchor);
 
-            var yOffset = rec.YOffset;
-            go.transform.position = new Vector3(pos.x, pos.y + yOffset, pos.z);
+            var go = Instantiate(def.prefab,
+                     baseXZ,
+                     Quaternion.Euler(0f, rec.FacingIndex * 90f, 0f));
+
+            float placeY = Grid.GetFloorTopY(anchor) + Grid.GetObjectExtentsY(go)
+                ;
+            Vector2 center = GetFootprintCenter(def.occupiedOffsets, rec.FacingIndex);
+
+            Vector3 worldOffset = new(center.x * Grid.tileSize,
+                                          0f,
+                                          center.y * Grid.tileSize);
+
+            Vector3 finalPos = baseXZ + worldOffset;
+            finalPos.y = placeY;
+
+            go.transform.position = finalPos;
 
             var inst = go.AddComponent<MachineInstance>();
             inst.def = def;
             inst.anchorCell = anchor;
             inst.facingIndex = rec.FacingIndex;
-            inst.YOffset = yOffset;
+            inst.YOffset = placeY - baseXZ.y;
 
             // Rebuild occupied/affected cell lists
             var occ = RotateOffsets(def.occupiedOffsets, anchor, rec.FacingIndex);
@@ -368,5 +383,25 @@ public class SaveManager : MonoBehaviour
             return d.x >= 0 ? 1 : 3; // east or west
         else
             return d.y >= 0 ? 0 : 2; // north or south
+    }
+
+    Vector2 GetFootprintCenter(Vector2Int[] offsets, int facingIndex)
+    {
+        float sumX = 0f, sumY = 0f;
+
+        foreach (var offset in offsets)
+        {
+            Vector2Int v = offset;
+            for (int i = 0; i < facingIndex; i++)
+            {
+                v = new Vector2Int(v.y, -v.x); // 90° cw
+            }
+
+            sumX += v.x;
+            sumY += v.y;
+        }
+
+        int count = offsets.Length;
+        return new Vector2(sumX / count, sumY / count);
     }
 }

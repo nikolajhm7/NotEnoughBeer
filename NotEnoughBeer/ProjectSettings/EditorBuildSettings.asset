@@ -26,6 +26,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Milo Scene.unity
     guid: d27f98e61ade33a458a615cab9619e0e
+  - enabled: 1
+    path: Assets/Scenes/Malting.unity
+    guid: 91499d690a72e3d40bcfcdcd495b30df
+  - enabled: 1
+    path: Assets/Scenes/MashingMinigame.unity
+    guid: 9097542e11d840e40b2515dd513e912b
+  - enabled: 1
+    path: Assets/Scenes/Rasmus Scene.unity
+    guid: 5606ee0a8529fae439ab30a72af9f0af
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

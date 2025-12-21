@@ -596,7 +596,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   popupPanel: {fileID: 549080062}
-  showTime: 3
+  showTime: 7
 --- !u!4 &298169154
 Transform:
   m_ObjectHideFlags: 0
@@ -712,7 +712,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   StarterMachineId: computer
   StarterMachineDef: {fileID: 11400000, guid: ae81a750d3c5fa642af967ec683afdc7, type: 2}
-  StartingCurrency: 3000
+  StartingCurrency: 500
   Grid: {fileID: 597805833}
   Player: {fileID: 1820048373}
   Currency: {fileID: 1133036432}
@@ -5035,7 +5035,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -191.8, y: 31.140015}
+  m_AnchoredPosition: {x: -226, y: 31.140015}
   m_SizeDelta: {x: 534.83, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1902689154
@@ -5091,7 +5091,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 32
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
