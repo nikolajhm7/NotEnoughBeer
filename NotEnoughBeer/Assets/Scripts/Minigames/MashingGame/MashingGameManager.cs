@@ -69,6 +69,8 @@ public class MashingGameManager : MonoBehaviour
 
     void Start()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         if (gameScorer == null)
         {
             gameScorer = FindAnyObjectByType<MashingGameScorer>();

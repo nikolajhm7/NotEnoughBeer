@@ -29,7 +29,9 @@ public class MaltingGameScorer : MonoBehaviour
 
 	void Start()
 	{
-		if (grid == null)
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        if (grid == null)
 			grid = FindAnyObjectByType<MaltingScoreGridUI>();
 
 		timer = roundTime;

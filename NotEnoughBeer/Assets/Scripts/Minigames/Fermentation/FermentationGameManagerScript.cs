@@ -47,6 +47,8 @@ public class FermentationGameManager : MonoBehaviour
 
     private void Start()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         if (fermentationUI == null)
             fermentationUI = FindFirstObjectByType<FermentationUI>();
             
